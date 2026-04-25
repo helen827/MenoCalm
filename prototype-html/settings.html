@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>设置 - 潮安</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="theme-glass.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap');
+        * { font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif; }
+        body { margin: 0; padding: 0; background: #ffffff; overflow: hidden; }
+        .ios-status-bar { height: 54px; background: #ffffff; display: flex; justify-content: space-between; align-items: center; padding: 0 28px; padding-top: 18px; }
+        .content-area { height: calc(100vh - 54px); overflow-y: auto; padding-bottom: 20px; }
+        .setting-item { display: flex; align-items: center; justify-content: space-between; padding: 16px 0; border-bottom: 1px solid #f0f0f0; cursor: pointer; }
+        .setting-item:last-child { border-bottom: none; }
+        .left-content { display: flex; align-items: center; gap: 14px; }
+        .icon-box { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+        .toggle-switch { width: 51px; height: 31px; background: #e9e9eb; border-radius: 16px; position: relative; cursor: pointer; transition: background 0.3s; }
+        .toggle-switch.active { background: #34c759; }
+        .toggle-switch::after { content: ''; position: absolute; width: 27px; height: 27px; background: white; border-radius: 50%; top: 2px; left: 2px; transition: left 0.3s; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        .toggle-switch.active::after { left: 22px; }
+        .font-size-btn { width: 44px; height: 44px; border-radius: 10px; border: 2px solid #e0e0e0; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; }
+        .font-size-btn.active { border-color: #E4B0B1; background: #fef9fa; color: #E4B0B1; }
+        .danger-zone { background: #fef2f2; border-radius: 16px; padding: 16px; }
+    </style>
+</head>
+<body class="has-tab">
+    <div class="ios-status-bar">
+        <span style="font-weight: 600; font-size: 15px;">9:41</span>
+        <div class="flex items-center gap-1">
+            <i class="fas fa-signal text-sm"></i>
+            <i class="fas fa-wifi text-sm ml-1"></i>
+            <i class="fas fa-battery-full text-sm ml-1"></i>
+        </div>
+    </div>
+
+    <div class="content-area pb-6">
+        <div class="px-6 pt-2">
+            <div class="flex items-center gap-3 mb-6">
+                <button class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center" onclick="location.href='profile.html'">
+                    <i class="fas fa-arrow-left text-gray-600"></i>
+                </button>
+                <h1 class="text-xl font-bold text-gray-800">设置</h1>
+            </div>
+
+            <div class="bg-white rounded-2xl p-4 mb-6 shadow-sm">
+                <h3 class="font-semibold text-gray-800 mb-4 px-2">提醒</h3>
+                <div class="space-y-1">
+                    <div class="setting-item">
+                        <div class="left-content">
+                            <div class="icon-box bg-rose-100">
+                                <i class="fas fa-bell text-rose-500"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-800">每日记录提醒</p>
+                                <p class="text-xs text-gray-400">每天 21:00</p>
+                            </div>
+                        </div>
+                        <div class="toggle-switch active" onclick="this.classList.toggle('active')"></div>
+                    </div>
+                    <div class="setting-item">
+                        <div class="left-content">
+                            <div class="icon-box bg-purple-100">
+                                <i class="fas fa-moon text-purple-500"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-800">睡前练习提醒</p>
+                                <p class="text-xs text-gray-400">每天 22:00</p>
+                            </div>
+                        </div>
+                        <div class="toggle-switch" onclick="this.classList.toggle('active')"></div>
+                    </div>
+                    <div class="setting-item">
+                        <div class="left-content">
+                            <div class="icon-box bg-blue-100">
+                                <i class="fas fa-chart-line text-blue-500"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-800">周报提醒</p>
+                                <p class="text-xs text-gray-400">每周一 10:00</p>
+                            </div>
+                        </div>
+                        <div class="toggle-switch active" onclick="this.classList.toggle('active')"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl p-4 mb-6 shadow-sm">
+                <h3 class="font-semibold text-gray-800 mb-4 px-2">数据与隐私</h3>
+                <div class="space-y-1">
+                    <div class="setting-item cursor-pointer">
+                        <div class="left-content">
+                            <div class="icon-box bg-gray-100">
+                                <i class="fas fa-download text-gray-500"></i>
+                            </div>
+                            <p class="font-medium text-gray-800">导出我的数据</p>
+                        </div>
+                        <i class="fas fa-chevron-right text-gray-300"></i>
+                    </div>
+                    <div class="setting-item cursor-pointer">
+                        <div class="left-content">
+                            <div class="icon-box bg-gray-100">
+                                <i class="fas fa-file-alt text-gray-500"></i>
+                            </div>
+                            <p class="font-medium text-gray-800">隐私政策</p>
+                        </div>
+                        <i class="fas fa-chevron-right text-gray-300"></i>
+                    </div>
+                    <div class="setting-item cursor-pointer">
+                        <div class="left-content">
+                            <div class="icon-box bg-gray-100">
+                                <i class="fas fa-shield-alt text-gray-500"></i>
+                            </div>
+                            <p class="font-medium text-gray-800">医疗免责声明</p>
+                        </div>
+                        <i class="fas fa-chevron-right text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl p-4 mb-6 shadow-sm">
+                <h3 class="font-semibold text-gray-800 mb-4 px-2">关于</h3>
+                <div class="space-y-1">
+                    <div class="setting-item">
+                        <div class="left-content">
+                            <div class="icon-box bg-blue-100">
+                                <i class="fas fa-info text-blue-500"></i>
+                            </div>
+                            <p class="font-medium text-gray-800">版本</p>
+                        </div>
+                        <span class="text-gray-400 text-sm">V0.2 MVP</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="danger-zone mb-6">
+                <h3 class="font-semibold text-red-600 mb-4 px-2"><i class="fas fa-exclamation-triangle mr-2"></i>危险区域</h3>
+                <div class="space-y-1">
+                    <div class="setting-item cursor-pointer">
+                        <div class="left-content">
+                            <div class="icon-box bg-red-100">
+                                <i class="fas fa-trash text-red-500"></i>
+                            </div>
+                            <p class="font-medium text-red-600">删除我的数据</p>
+                        </div>
+                        <i class="fas fa-chevron-right text-gray-300"></i>
+                    </div>
+                    <div class="setting-item cursor-pointer">
+                        <div class="left-content">
+                            <div class="icon-box bg-red-100">
+                                <i class="fas fa-user-slash text-red-500"></i>
+                            </div>
+                            <p class="font-medium text-red-600">注销账号</p>
+                        </div>
+                        <i class="fas fa-chevron-right text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+
+            <p class="text-center text-gray-400 text-xs mb-4">MenoCalm V0.2 MVP</p>
+            <p class="text-center text-gray-400 text-xs">不是忍过去，而是看懂它。</p>
+        </div>
+    </div>
+
+    <div class="tab-bar">
+        <div class="tab-item" onclick="location.href='home.html'">
+            <i class="fas fa-comments"></i>
+            <span>AI对话</span>
+        </div>
+        <div class="tab-item" onclick="location.href='learn.html'">
+            <i class="fas fa-users"></i>
+            <span>社区</span>
+        </div>
+        <div class="tab-item" onclick="location.href='practice.html'">
+            <i class="fas fa-wind"></i>
+            <span>呼吸练习</span>
+        </div>
+        <div class="tab-item active" onclick="location.href='profile.html'">
+            <i class="fas fa-chart-pie"></i>
+            <span>我的</span>
+        </div>
+    </div>
+
+    <script>
+        function selectFontSize(el) {
+            document.querySelectorAll('.font-size-btn').forEach(btn => btn.classList.remove('active'));
+            el.classList.add('active');
+        }
+    </script>
+</body>
+</html>

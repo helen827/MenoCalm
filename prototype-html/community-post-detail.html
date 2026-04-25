@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>帖子详情 - 潮安</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="theme-glass.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap');
+        * { font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif; }
+        body { margin: 0; padding: 0; background: #fff; overflow: hidden; }
+        .ios-status-bar { height: 54px; background: #fff; display: flex; justify-content: space-between; align-items: center; padding: 0 28px; padding-top: 18px; }
+        .content-area { height: calc(100vh - 54px - 72px); overflow-y: auto; background: #fff; }
+        .hero-img { width: 100%; height: 460px; object-fit: cover; display: block; }
+        .dot { width: 6px; height: 6px; border-radius: 999px; background: #d0d0d0; }
+        .dot.active { background: #ff2442; }
+        .comment-row { display: flex; gap: 10px; padding: 10px 0; border-bottom: 1px solid #f4f4f4; }
+        .toolbar {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            height: 72px;
+            background: #fff;
+            border-top: 1px solid #efefef;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 0 16px;
+        }
+        .input-pill { flex: 1; height: 38px; border-radius: 20px; background: #f5f5f5; color: #a3a3a3; display: flex; align-items: center; padding: 0 14px; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <div class="ios-status-bar">
+        <span style="font-weight: 600; font-size: 15px;">16:03</span>
+        <div class="flex items-center gap-1">
+            <i class="fas fa-signal text-sm"></i>
+            <i class="fas fa-wifi text-sm ml-1"></i>
+            <i class="fas fa-battery-three-quarters text-sm ml-1"></i>
+        </div>
+    </div>
+
+    <div class="content-area">
+        <div class="px-4 pt-2">
+            <div class="flex items-center justify-between mb-3">
+                <button class="w-9 h-9 rounded-full border border-gray-200 text-gray-600" onclick="location.href='learn.html'">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <div class="flex items-center gap-2">
+                    <img src="https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=100&h=100&fit=crop" alt="avatar" class="w-8 h-8 rounded-full object-cover">
+                    <span class="text-xl font-medium text-gray-800">一颗金桔 JinJi</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button class="px-4 h-9 rounded-full border border-red-300 text-red-500 text-sm font-semibold">Follow</button>
+                    <i class="fas fa-share-alt text-gray-600"></i>
+                </div>
+            </div>
+        </div>
+
+        <img src="https://images.unsplash.com/photo-1518611012118-696072aa579a?w=900&h=1200&fit=crop" alt="cover" class="hero-img">
+        <div class="flex items-center justify-center gap-2 py-3">
+            <span class="dot active"></span>
+            <span class="dot"></span>
+            <span class="dot"></span>
+            <span class="dot"></span>
+        </div>
+
+        <div class="px-4 pb-4">
+            <h1 class="text-3xl font-bold text-gray-900 leading-snug mb-2">斯坦福教授：40+ 女性 11 条饮食&运动建议</h1>
+            <p class="text-2xl text-gray-700 leading-relaxed mb-3">更年期是我们每一个女性生命中的必经之路。超过 2.8 亿中国女性正在经历这场蜕变。</p>
+            <div class="text-gray-500 text-base border-t border-b border-gray-100 py-3 mb-2">
+                <p class="mb-1">Translate</p>
+                <p>Last edited 2025-05-12 Guangdong</p>
+            </div>
+
+            <div class="flex items-center justify-between text-gray-600 py-2 mb-1">
+                <p class="text-lg font-semibold">4 comment(s)</p>
+                <i class="fas fa-sliders-h"></i>
+            </div>
+
+            <div class="flex items-center gap-2 mb-2">
+                <img src="https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=100&h=100&fit=crop" class="w-8 h-8 rounded-full object-cover" alt="me">
+                <div class="flex-1 h-10 rounded-full bg-gray-100 text-gray-400 px-4 flex items-center">Say something...</div>
+                <i class="fas fa-microphone text-gray-400"></i>
+                <i class="far fa-image text-gray-400"></i>
+            </div>
+
+            <div class="comment-row">
+                <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&h=100&fit=crop" class="w-10 h-10 rounded-full object-cover" alt="u1">
+                <div class="flex-1">
+                    <p class="text-xl text-gray-500">Diana</p>
+                    <p class="text-2xl text-gray-800">感谢</p>
+                    <p class="text-lg text-gray-500">2025-05-14 Shandong · Reply · Translate</p>
+                </div>
+                <i class="far fa-heart text-gray-400 mt-2"></i>
+            </div>
+
+            <div class="comment-row">
+                <img src="https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=100&h=100&fit=crop" class="w-10 h-10 rounded-full object-cover" alt="u2">
+                <div class="flex-1">
+                    <p class="text-xl text-gray-500">一颗金桔 JinJi <span class="text-sm bg-pink-100 text-pink-500 px-2 py-0.5 rounded-full">Author</span></p>
+                    <p class="text-2xl text-gray-800">赶在了母亲节的晚上！最近2周都在研究更年期，整理了那时的场景，也对未来的我有了认知。</p>
+                    <p class="text-lg text-gray-500">2025-05-11 Guangdong · Reply · Translate</p>
+                </div>
+                <div class="text-gray-400 mt-2 text-right">
+                    <i class="far fa-heart"></i>
+                    <p>3</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toolbar">
+        <div class="input-pill">Say something...</div>
+        <div class="flex items-center gap-4 text-gray-700">
+            <span class="text-xl"><i class="far fa-heart"></i> 347</span>
+            <span class="text-xl"><i class="far fa-star"></i> 578</span>
+            <span class="text-xl"><i class="far fa-comment"></i> 4</span>
+        </div>
+    </div>
+</body>
+</html>

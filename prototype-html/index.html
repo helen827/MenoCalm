@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>潮安 - 高保真原型展示</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap');
+        * { font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif; }
+        body { background: linear-gradient(135deg, #f8f5f7 0%, #f0eaed 100%); min-height: 100vh; }
+        .phone-frame {
+            width: 393px;
+            height: 852px;
+            background: #1c1c1e;
+            border-radius: 54px;
+            padding: 12px;
+            box-shadow: 0 42px 84px rgba(30, 23, 27, 0.22), 0 16px 46px rgba(30, 23, 27, 0.12);
+            position: relative;
+        }
+        .phone-frame::before {
+            content: '';
+            position: absolute;
+            top: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 34px;
+            background: #1c1c1e;
+            border-radius: 0 0 20px 20px;
+            z-index: 10;
+        }
+        .phone-frame::after {
+            content: '';
+            position: absolute;
+            top: 18px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 8px;
+            background: #3a3a3c;
+            border-radius: 4px;
+            z-index: 11;
+        }
+        .phone-screen {
+            width: 100%;
+            height: 100%;
+            background: #ffffff;
+            border-radius: 44px;
+            overflow: hidden;
+            position: relative;
+        }
+        .phone-screen iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        .page-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+            gap: 60px;
+            padding: 80px 40px;
+            justify-items: center;
+        }
+        .page-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+        }
+        .page-label {
+            background: linear-gradient(135deg, #baa1ac 0%, #a08491 100%);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            box-shadow: 0 4px 15px rgba(132, 107, 118, 0.28);
+        }
+        .header {
+            background: linear-gradient(135deg, #bca3ad 0%, #E4B0B1 100%);
+            padding: 30px 40px;
+            color: white;
+            text-align: center;
+        }
+        .header h1 { font-size: 32px; font-weight: 700; margin-bottom: 8px; }
+        .header p { font-size: 16px; opacity: 0.9; }
+        .section-title {
+            background: linear-gradient(90deg, #a08491, #80656f);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 28px;
+            font-weight: 700;
+            padding: 40px 40px 20px;
+        }
+        .scroll-hint {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            z-index: 100;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1><i class="fas fa-heartbeat mr-3"></i>潮安 App</h1>
+        <p>更年期女性健康管理 - 高保真原型展示</p>
+        <p class="text-sm mt-2 opacity-75">不是忍过去，而是看懂它。</p>
+    </header>
+
+    <h2 class="section-title">进入前引导</h2>
+    <div class="page-grid">
+        <div class="page-item">
+            <div class="phone-frame">
+                <div class="phone-screen">
+                    <iframe src="intro-1.html"></iframe>
+                </div>
+            </div>
+            <span class="page-label">intro-1.html - 介绍页1</span>
+        </div>
+        <div class="page-item">
+            <div class="phone-frame">
+                <div class="phone-screen">
+                    <iframe src="intro-2.html"></iframe>
+                </div>
+            </div>
+            <span class="page-label">intro-2.html - 介绍页2</span>
+        </div>
+        <div class="page-item">
+            <div class="phone-frame">
+                <div class="phone-screen">
+                    <iframe src="intro-3.html"></iframe>
+                </div>
+            </div>
+            <span class="page-label">intro-3.html - 介绍页3</span>
+        </div>
+        <div class="page-item">
+            <div class="phone-frame">
+                <div class="phone-screen">
+                    <iframe src="welcome.html"></iframe>
+                </div>
+            </div>
+            <span class="page-label">welcome.html - 登录注册</span>
+        </div>
+    </div>
+
+    <h2 class="section-title">四大模块</h2>
+    <div class="page-grid">
+        <div class="page-item">
+            <div class="phone-frame">
+                <div class="phone-screen">
+                    <iframe src="home.html"></iframe>
+                </div>
+            </div>
+            <span class="page-label">home.html - AI 对话</span>
+        </div>
+        <div class="page-item">
+            <div class="phone-frame">
+                <div class="phone-screen">
+                    <iframe src="learn.html"></iframe>
+                </div>
+            </div>
+            <span class="page-label">learn.html - 社区</span>
+        </div>
+        <div class="page-item">
+            <div class="phone-frame">
+                <div class="phone-screen">
+                    <iframe src="practice.html"></iframe>
+                </div>
+            </div>
+            <span class="page-label">practice.html - 呼吸练习</span>
+        </div>
+        <div class="page-item">
+            <div class="phone-frame">
+                <div class="phone-screen">
+                    <iframe src="profile.html"></iframe>
+                </div>
+            </div>
+            <span class="page-label">profile.html - 我的</span>
+        </div>
+    </div>
+
+    <h2 class="section-title">社区内容</h2>
+    <div class="page-grid">
+        <div class="page-item">
+            <div class="phone-frame">
+                <div class="phone-screen">
+                    <iframe src="learn.html"></iframe>
+                </div>
+            </div>
+            <span class="page-label">learn.html - 社区首页</span>
+        </div>
+        
+        <div class="page-item">
+            <div class="phone-frame">
+                <div class="phone-screen">
+                    <iframe src="community-post-detail.html"></iframe>
+                </div>
+            </div>
+            <span class="page-label">community-post-detail.html - 用户帖子详情</span>
+        </div>
+        <div class="page-item">
+            <div class="phone-frame">
+                <div class="phone-screen">
+                    <iframe src="community-post.html"></iframe>
+                </div>
+            </div>
+            <span class="page-label">community-post.html - 发布分享</span>
+        </div>
+    </div>
+
+    <h2 class="section-title">练习模块</h2>
+    <div class="page-grid">
+        <div class="page-item">
+            <div class="phone-frame">
+                <div class="phone-screen">
+                    <iframe src="practice.html"></iframe>
+                </div>
+            </div>
+            <span class="page-label">practice.html - 练习首页</span>
+        </div>
+        <div class="page-item">
+            <div class="phone-frame">
+                <div class="phone-screen">
+                    <iframe src="practice-detail.html"></iframe>
+                </div>
+            </div>
+            <span class="page-label">practice-detail.html - 练习详情</span>
+        </div>
+    </div>
+
+    <h2 class="section-title">我的页面</h2>
+    <div class="page-grid">
+        <div class="page-item">
+            <div class="phone-frame">
+                <div class="phone-screen">
+                    <iframe src="profile.html"></iframe>
+                </div>
+            </div>
+            <span class="page-label">profile.html - 个人中心</span>
+        </div>
+        <div class="page-item">
+            <div class="phone-frame">
+                <div class="phone-screen">
+                    <iframe src="trend-report.html"></iframe>
+                </div>
+            </div>
+            <span class="page-label">trend-report.html - 趋势报告</span>
+        </div>
+        <div class="page-item">
+            <div class="phone-frame">
+                <div class="phone-screen">
+                    <iframe src="medical-list.html"></iframe>
+                </div>
+            </div>
+            <span class="page-label">medical-list.html - 就医清单</span>
+        </div>
+        <div class="page-item">
+            <div class="phone-frame">
+                <div class="phone-screen">
+                    <iframe src="settings.html"></iframe>
+                </div>
+            </div>
+            <span class="page-label">settings.html - 设置</span>
+        </div>
+    </div>
+
+    <div class="scroll-hint">
+        <i class="fas fa-arrows-alt-h mr-2"></i>水平滚动查看更多页面
+    </div>
+
+    <footer class="text-center py-12 text-gray-500 text-sm">
+        <p>MenoCalm App 高保真原型 - 基于 PRD 文档生成</p>
+        <p class="mt-2">设计规范：iPhone 17 Pro (393×852px) | UI框架：Tailwind CSS | 图标：FontAwesome</p>
+    </footer>
+</body>
+</html>

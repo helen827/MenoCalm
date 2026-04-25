@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>首页 - 潮安</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="theme-glass.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap');
+        * { font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif; }
+        body {
+            margin: 0;
+            padding: 0;
+            background: radial-gradient(circle at 18% 12%, #fffaff 0%, #f8f5f9 36%, #f2ecef 100%);
+            overflow: hidden;
+            position: relative;
+        }
+        body::before {
+            content: '';
+            position: absolute;
+            width: 340px;
+            height: 340px;
+            right: -180px;
+            top: -66px;
+            background: radial-gradient(circle, rgba(231, 203, 216, 0.56), rgba(231, 203, 216, 0));
+            filter: blur(54px);
+            pointer-events: none;
+            z-index: 0;
+        }
+        body::after {
+            content: '';
+            position: absolute;
+            width: 320px;
+            height: 320px;
+            left: -160px;
+            bottom: -40px;
+            background: radial-gradient(circle, rgba(176, 216, 255, 0.68), rgba(176, 216, 255, 0));
+            filter: blur(50px);
+            pointer-events: none;
+            z-index: 0;
+        }
+        .ios-status-bar { height: 54px; background: transparent; display: flex; justify-content: space-between; align-items: center; padding: 0 28px; padding-top: 18px; position: relative; z-index: 10; }
+        .content-area {
+            height: calc(100vh - 54px - 76px);
+            overflow: hidden;
+            position: relative;
+            z-index: 2;
+        }
+        .tab-bar { position: fixed; bottom: 0; left: 0; right: 0; height: 76px; background: rgba(255,255,255,0.34); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px); border-top: 0; display: flex; justify-content: space-around; align-items: center; padding-top: 0; z-index: 100; box-shadow: 0 -6px 14px rgba(138,114,125,0.05); }
+        .tab-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: #a0a0a0; font-size: 10px; font-weight: 500; }
+        .tab-item.active { color: #E4B0B1; }
+        .tab-item i { font-size: 21px; margin-bottom: 1px; }
+        .chat-thread { position: absolute; left: 0; right: 0; top: 0; bottom: 86px; overflow-y: auto; padding: 16px 16px 12px; z-index: 2; }
+        .chat-bubble {
+            max-width: 88%;
+            padding: 12px 14px;
+            border-radius: 22px;
+            font-size: 14px;
+            line-height: 1.5;
+            backdrop-filter: blur(44px) saturate(170%);
+            -webkit-backdrop-filter: blur(44px) saturate(170%);
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,0.58), inset 0 2px 18px rgba(255,255,255,0.56), 0 14px 28px rgba(138,114,125,0.10);
+        }
+        .chat-ai { background: rgba(255,255,255,0.42); color: #4f4348; border: 1px solid rgba(255,255,255,0.86); border-bottom-left-radius: 8px; }
+        .chat-user { background: linear-gradient(135deg, rgba(182,149,163,0.84), rgba(159,128,141,0.84)); color: #fff; border: 1px solid rgba(255,255,255,0.42); border-bottom-right-radius: 8px; }
+        .quick-chip {
+            border-radius: 999px;
+            padding: 8px 12px;
+            font-size: 12px;
+            border: 1px solid rgba(255,255,255,0.86);
+            background: rgba(255,255,255,0.48);
+            color: #765d67;
+            backdrop-filter: blur(26px) saturate(160%);
+            -webkit-backdrop-filter: blur(26px) saturate(160%);
+            box-shadow: 0 10px 22px rgba(138,114,125,0.10);
+        }
+        .composer-wrap { position: absolute; left: 0; right: 0; bottom: 0; padding: 10px 12px; background: rgba(255,255,255,0.52); border-top: 1px solid rgba(255,255,255,0.78); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px); z-index: 3; }
+        .composer { display: flex; align-items: center; gap: 8px; }
+        .composer-input { flex: 1; background: rgba(255,255,255,0.58); border: 1px solid rgba(255,255,255,0.9); border-radius: 999px; padding: 11px 14px; display: flex; align-items: center; gap: 8px; box-shadow: inset 0 1px 10px rgba(255,255,255,0.5); }
+    </style>
+</head>
+<body class="has-tab">
+    <div class="ios-status-bar">
+        <span style="font-weight: 600; font-size: 15px; color: #3a3a3c;">9:41</span>
+        <div class="flex items-center gap-1.5" style="color: #3a3a3c;">
+            <i class="fas fa-signal text-xs"></i>
+            <i class="fas fa-wifi text-xs"></i>
+            <i class="fas fa-battery-full text-sm"></i>
+        </div>
+    </div>
+
+    <div class="content-area">
+        <div class="chat-thread space-y-3">
+            <div class="flex justify-center pb-1">
+                <span class="text-xs px-3 py-1 rounded-full" style="background:#ffffff;border:1px solid rgba(118,93,103,0.12);color:#765d67;">潮安AI小棉袄</span>
+            </div>
+            <div class="flex justify-start">
+                <div class="chat-bubble chat-ai">
+                    你可以直接和我说今天做了什么、有什么症状、心情怎么样。我会自动帮你归纳到报告里。
+                </div>
+            </div>
+            <div class="flex justify-start">
+                <div class="chat-bubble chat-ai">
+                    也可以随时问我任何更年期相关科普问题，比如潮热、睡眠、情绪波动、饮食和运动。
+                </div>
+            </div>
+            <div class="flex justify-end">
+                <div class="chat-bubble chat-user">
+                    今天下午有点潮热，昨晚睡得浅，心情有点烦躁。晚饭后还喝了咖啡。
+                </div>
+            </div>
+            <div class="flex justify-start">
+                <div class="chat-bubble chat-ai">
+                    收到，已为你记录：潮热、睡眠变浅、情绪波动、咖啡因摄入。明天中午会自动汇总进报告。需要我现在给你一版“今晚更好入睡”的建议吗？
+                </div>
+            </div>
+            <div class="flex flex-wrap gap-2 pt-1">
+                <span class="quick-chip">我是不是围绝经期？</span>
+                <span class="quick-chip">潮热怎么快速缓解？</span>
+                <span class="quick-chip">今晚怎么睡得更好？</span>
+            </div>
+        </div>
+
+        <div class="composer-wrap">
+            <div class="composer">
+                <button class="w-10 h-10 rounded-full bg-white border border-gray-200 text-gray-500">
+                    <i class="fas fa-plus"></i>
+                </button>
+                <div class="composer-input">
+                    <input type="text" placeholder="可以和我说任何事..." class="bg-transparent flex-1 outline-none text-gray-700 text-sm">
+                    <i class="fas fa-microphone text-gray-400"></i>
+                </div>
+                <button class="w-10 h-10 rounded-full text-white" style="background: linear-gradient(135deg, #E4B0B1, #E4B0B1);">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="tab-bar">
+        <div class="tab-item active" onclick="location.href='home.html'">
+            <i class="fas fa-comments"></i>
+            <span>AI对话</span>
+        </div>
+        <div class="tab-item" onclick="location.href='learn.html'">
+            <i class="fas fa-users"></i>
+            <span>社区</span>
+        </div>
+        <div class="tab-item" onclick="location.href='practice.html'">
+            <i class="fas fa-wind"></i>
+            <span>呼吸练习</span>
+        </div>
+        <div class="tab-item" onclick="location.href='profile.html'">
+            <i class="fas fa-chart-pie"></i>
+            <span>我的</span>
+        </div>
+    </div>
+</body>
+</html>

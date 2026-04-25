@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>就医清单 - 潮安</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="theme-glass.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap');
+        * { font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif; }
+        body { margin: 0; padding: 0; background: #ffffff; overflow: hidden; }
+        .ios-status-bar { height: 54px; background: #ffffff; display: flex; justify-content: space-between; align-items: center; padding: 0 28px; padding-top: 18px; }
+        .content-area { height: calc(100vh - 54px - 80px); overflow-y: auto; padding-bottom: 20px; }
+        .time-tabs { display: flex; gap: 8px; }
+        .time-tab { padding: 8px 16px; border-radius: 20px; font-size: 14px; cursor: pointer; transition: all 0.2s; }
+        .time-tab.active { background: #E4B0B1; color: white; }
+        .time-tab:not(.active) { background: #F7F3F3; color: #6F6A6C; }
+        .report-card { background: #F7F3F3; border-radius: 16px; padding: 16px; box-shadow: 0 2px 8px rgba(47,43,44,0.06); }
+        .question-chip { display: inline-block; padding: 10px 16px; border-radius: 20px; border: 1px solid #DDD5D8; font-size: 14px; cursor: pointer; transition: all 0.2s; }
+        .question-chip:hover { border-color: #E4B0B1; background: #F7F3F3; }
+        .question-chip.selected { border-color: #E4B0B1; background: #E9E1E3; }
+        .preview-box { background: #F7F3F3; border-radius: 12px; padding: 16px; font-size: 13px; line-height: 1.6; }
+    </style>
+</head>
+<body class="has-tab">
+    <div class="ios-status-bar">
+        <span style="font-weight: 600; font-size: 15px;">9:41</span>
+        <div class="flex items-center gap-1">
+            <i class="fas fa-signal text-sm"></i>
+            <i class="fas fa-wifi text-sm ml-1"></i>
+            <i class="fas fa-battery-full text-sm ml-1"></i>
+        </div>
+    </div>
+
+    <div class="content-area pb-20">
+        <div class="px-6 pt-2">
+            <div class="flex items-center gap-3 mb-6">
+                <button class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center" onclick="location.href='profile.html'">
+                    <i class="fas fa-arrow-left text-gray-600"></i>
+                </button>
+                <h1 class="text-xl font-bold text-gray-800">就医沟通清单</h1>
+            </div>
+
+            <div class="time-tabs mb-6">
+                <div class="time-tab">近7天</div>
+                <div class="time-tab active">近30天</div>
+                <div class="time-tab">近90天</div>
+            </div>
+
+            <div class="rounded-2xl p-5 mb-6" style="background: linear-gradient(135deg, #F7F3F3 0%, #E9E1E3 100%);">
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 rounded-full bg-white/50 flex items-center justify-center">
+                        <i class="fas fa-check-circle text-xl" style="color:#A39DA0;"></i>
+                    </div>
+                    <div>
+                        <p class="font-semibold text-gray-800">数据已准备就绪</p>
+                        <p class="text-gray-500 text-sm mt-1">根据你30天的记录生成</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="report-card mb-6">
+                <h3 class="font-semibold text-gray-800 mb-4">主要症状汇总</h3>
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-moon text-rose-400"></i>
+                            <span class="text-gray-700">睡眠差</span>
+                        </div>
+                        <span class="text-sm font-medium text-gray-500">出现 12 次</span>
+                    </div>
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-bolt text-purple-400"></i>
+                            <span class="text-gray-700">焦虑</span>
+                        </div>
+                        <span class="text-sm font-medium text-gray-500">出现 8 次</span>
+                    </div>
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-fire text-orange-400"></i>
+                            <span class="text-gray-700">潮热</span>
+                        </div>
+                        <span class="text-sm font-medium text-gray-500">出现 5 次</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="report-card mb-6">
+                <h3 class="font-semibold text-gray-800 mb-4">需要特别说明的情况</h3>
+                <div class="bg-amber-50 rounded-xl p-4">
+                    <div class="flex items-start gap-2">
+                        <i class="fas fa-exclamation-triangle text-amber-500 mt-1"></i>
+                        <p class="text-amber-700 text-sm">你记录了2次心悸，虽然频率不高，但如果医生问起可以主动说明发生时间和伴随症状。</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="report-card mb-6">
+                <h3 class="font-semibold text-gray-800 mb-4">想问医生的问题</h3>
+                <p class="text-sm text-gray-500 mb-4">点击选择或自定义添加：</p>
+                <div class="flex flex-wrap gap-2 mb-4">
+                    <div class="question-chip selected" onclick="toggleQuestion(this)">我的症状是否可能与围绝经期有关？</div>
+                    <div class="question-chip selected" onclick="toggleQuestion(this)">是否需要做相关检查？</div>
+                    <div class="question-chip" onclick="toggleQuestion(this)">是否适合激素治疗？</div>
+                    <div class="question-chip" onclick="toggleQuestion(this)">我的睡眠问题是否需要进一步评估？</div>
+                    <div class="question-chip" onclick="toggleQuestion(this)">饮食和生活方式有什么建议？</div>
+                </div>
+                <textarea class="w-full p-3 border border-gray-200 rounded-xl text-sm" rows="2" placeholder="添加你自己的问题..."></textarea>
+            </div>
+
+            <div class="report-card mb-6">
+                <h3 class="font-semibold text-gray-800 mb-4">清单预览</h3>
+                <div class="preview-box">
+                    <p class="text-gray-600"><strong>症状记录（近30天）：</strong></p>
+                    <p class="text-gray-600 mt-1">- 睡眠问题：12次（主要表现为入睡困难、夜间醒来）</p>
+                    <p class="text-gray-600">- 焦虑情绪：8次（与压力事件相关）</p>
+                    <p class="text-gray-600">- 潮热：5次（可能与睡眠不足有关）</p>
+                    <p class="text-gray-600">- 心悸：2次（需向医生说明）</p>
+                    <p class="text-gray-600 mt-3"><strong>想问医生的问题：</strong></p>
+                    <p class="text-gray-600">1. 我的症状是否可能与围绝经期有关？</p>
+                    <p class="text-gray-600">2. 是否需要做相关检查？</p>
+                </div>
+            </div>
+
+            <div class="flex gap-3">
+                <button class="flex-1 py-3 border-2 border-rose-200 text-rose-500 rounded-full font-medium flex items-center justify-center gap-2">
+                    <i class="fas fa-copy"></i> 复制
+                </button>
+                <button class="flex-1 py-3 bg-rose-400 text-white rounded-full font-medium flex items-center justify-center gap-2">
+                    <i class="fas fa-save"></i> 保存
+                </button>
+            </div>
+            <button class="w-full mt-3 py-3 bg-gray-100 text-gray-600 rounded-full font-medium flex items-center justify-center gap-2">
+                <i class="fas fa-image"></i> 保存为图片
+            </button>
+        </div>
+    </div>
+
+    <div class="tab-bar">
+        <div class="tab-item" onclick="location.href='home.html'">
+            <i class="fas fa-comments"></i>
+            <span>AI对话</span>
+        </div>
+        <div class="tab-item" onclick="location.href='learn.html'">
+            <i class="fas fa-users"></i>
+            <span>社区</span>
+        </div>
+        <div class="tab-item" onclick="location.href='practice.html'">
+            <i class="fas fa-wind"></i>
+            <span>呼吸练习</span>
+        </div>
+        <div class="tab-item active" onclick="location.href='profile.html'">
+            <i class="fas fa-chart-pie"></i>
+            <span>我的</span>
+        </div>
+    </div>
+
+    <script>
+        function toggleQuestion(el) {
+            el.classList.toggle('selected');
+        }
+    </script>
+</body>
+</html>

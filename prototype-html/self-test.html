@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>症状自测 - 潮安</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="theme-glass.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap');
+        * { font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif; }
+        body { margin: 0; padding: 0; background: #ffffff; overflow: hidden; }
+        .ios-status-bar { height: 54px; background: #ffffff; display: flex; justify-content: space-between; align-items: center; padding: 0 28px; padding-top: 18px; }
+        .gradient-bg { background: #ffffff; min-height: 100vh; }
+        .progress-bar { height: 4px; background: #f0f0f0; border-radius: 2px; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #bda4ae, #E4B0B1); border-radius: 2px; transition: width 0.3s; }
+        .option-item { padding: 16px; border: 2px solid #f0f0f0; border-radius: 12px; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; gap: 12px; }
+        .option-item:hover { border-color: #E4B0B1; background: #fef9fa; }
+        .option-item.selected { border-color: #E4B0B1; background: #fce4ec; }
+        .option-item .check-circle { width: 24px; height: 24px; border-radius: 50%; border: 2px solid #d1d1d6; display: flex; align-items: center; justify-content: center; transition: all 0.3s; }
+        .option-item.selected .check-circle { background: #E4B0B1; border-color: #E4B0B1; }
+        .option-item.selected .check-circle::after { content: '✓'; color: white; font-size: 12px; }
+        .question-card { background: linear-gradient(135deg, #fef0f3 0%, #fff 100%); border-radius: 24px; padding: 24px; margin: 0 20px; }
+        .disclaimer { background: #f5f5f7; border-radius: 12px; padding: 12px; margin: 16px 20px; }
+    </style>
+</head>
+<body>
+    <div class="ios-status-bar">
+        <span style="font-weight: 600; font-size: 15px;">9:41</span>
+        <div class="flex items-center gap-1">
+            <i class="fas fa-signal text-sm"></i>
+            <i class="fas fa-wifi text-sm ml-1"></i>
+            <i class="fas fa-battery-full text-sm ml-1"></i>
+        </div>
+    </div>
+
+    <div class="gradient-bg min-h-screen pb-28">
+        <div class="px-6 pt-2">
+            <div class="flex items-center gap-3 mb-4">
+                <button class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
+                    <i class="fas fa-arrow-left text-gray-600"></i>
+                </button>
+                <div class="flex-1">
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 60%"></div>
+                    </div>
+                </div>
+                <span class="text-sm text-gray-400">3/5</span>
+            </div>
+        </div>
+
+        <div class="question-card mb-6">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 rounded-full bg-rose-100 flex items-center justify-center">
+                    <i class="fas fa-moon text-rose-500"></i>
+                </div>
+                <span class="text-sm font-medium text-rose-500">睡眠变化</span>
+            </div>
+            <h2 class="text-xl font-bold text-gray-800 mb-2">最近 3 个月，你的睡眠质量是否发生变化？</h2>
+            <p class="text-sm text-gray-500">包括入睡困难、夜间醒来、早醒等情况</p>
+        </div>
+
+        <div class="px-6 space-y-3">
+            <div class="option-item" onclick="selectOption(this)">
+                <div class="check-circle"></div>
+                <span class="text-gray-700">没有明显变化</span>
+            </div>
+            <div class="option-item" onclick="selectOption(this)">
+                <div class="check-circle"></div>
+                <span class="text-gray-700">偶尔睡不好（每周 1-2 天）</span>
+            </div>
+            <div class="option-item" onclick="selectOption(this)">
+                <div class="check-circle"></div>
+                <span class="text-gray-700">经常睡不好（每周 3-4 天）</span>
+            </div>
+            <div class="option-item" onclick="selectOption(this)">
+                <div class="check-circle"></div>
+                <span class="text-gray-700">几乎每天都睡不好</span>
+            </div>
+            <div class="option-item" onclick="selectOption(this)">
+                <div class="check-circle"></div>
+                <span class="text-gray-700">不确定</span>
+            </div>
+        </div>
+
+        <div class="disclaimer">
+            <div class="flex items-start gap-2">
+                <i class="fas fa-info-circle text-blue-500 mt-1"></i>
+                <p class="text-xs text-gray-500">本测试仅供参考，不做医学诊断。如果你正在经历严重的睡眠问题，建议咨询医生。</p>
+            </div>
+        </div>
+
+        <div class="fixed bottom-0 left-0 right-0 p-6 bg-white border-t">
+            <div class="flex gap-3">
+                <button class="flex-1 bg-gray-100 text-gray-600 font-semibold py-4 rounded-full">
+                    上一步
+                </button>
+                <button class="flex-1 bg-rose-400 text-white font-semibold py-4 rounded-full">
+                    下一题
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function selectOption(el) {
+            el.parentElement.querySelectorAll('.option-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+            el.classList.add('selected');
+        }
+    </script>
+</body>
+</html>

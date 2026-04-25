@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>选择状态 - 潮安</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="theme-glass.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap');
+        * { font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif; }
+        body { margin: 0; padding: 0; background: #ffffff; overflow: hidden; }
+        .ios-status-bar { height: 54px; background: transparent; display: flex; justify-content: space-between; align-items: center; padding: 0 28px; padding-top: 18px; }
+        .gradient-bg { background: linear-gradient(180deg, #fcf9fa 0%, #ffffff 100%); min-height: 100vh; }
+        .option-card { background: white; border: 1.5px solid #f0f0f0; border-radius: 20px; padding: 22px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 4px 12px rgba(0,0,0,0.02); }
+        .option-card:active { transform: scale(0.98); }
+        .option-card.selected { border-color: #E4B0B1; background: #faf6f8; box-shadow: 0 10px 24px rgba(132, 107, 118, 0.12); }
+        .progress-bar { height: 6px; background: #f0f0f0; border-radius: 3px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #c4aab5, #a78492); border-radius: 3px; transition: width 0.6s ease; }
+        .check-circle { width: 24px; height: 24px; border-radius: 50%; border: 2px solid #e0e0e0; transition: all 0.3s; position: relative; }
+        .selected .check-circle { border-color: #a78492; background: #a78492; }
+        .selected .check-circle::after { content: '✓'; color: white; position: absolute; font-size: 14px; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+    </style>
+</head>
+<body>
+    <div class="ios-status-bar">
+        <span style="font-weight: 600; font-size: 15px; color: #3a3a3c;">9:41</span>
+        <div class="flex items-center gap-1.5" style="color: #3a3a3c;">
+            <i class="fas fa-signal text-xs"></i>
+            <i class="fas fa-wifi text-xs"></i>
+            <i class="fas fa-battery-full text-sm"></i>
+        </div>
+    </div>
+
+    <div class="gradient-bg min-h-screen pb-24">
+        <div class="px-6 pt-4">
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: 25%"></div>
+            </div>
+        </div>
+
+        <div class="px-6 pt-10">
+            <h1 class="text-3xl font-bold text-gray-800 mb-3 tracking-tight">你现在更接近哪种状态？</h1>
+            <p class="text-gray-400 text-sm mb-10">选择最接近的选项，我们可以为你提供更合适的内容</p>
+
+            <div class="space-y-4">
+                <div class="option-card cursor-pointer" onclick="selectOption(this)">
+                    <div class="flex items-center gap-4">
+                        <div class="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0" style="background:#f3ebee;">
+                            <i class="fas fa-question text-xl" style="color:#E4B0B1;"></i>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="font-bold text-gray-800 text-base">我不确定自己是不是进入围绝经期</h3>
+                            <p class="text-xs text-gray-400 mt-1">最近有一些变化，想了解是否相关</p>
+                        </div>
+                        <div class="check-circle flex-shrink-0"></div>
+                    </div>
+                </div>
+
+                <div class="option-card cursor-pointer" onclick="selectOption(this)">
+                    <div class="flex items-center gap-4">
+                        <div class="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0" style="background:#f3ebee;">
+                            <i class="fas fa-fire-alt text-xl" style="color:#E4B0B1;"></i>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="font-bold text-gray-800 text-base">我已经有了一些明显症状</h3>
+                            <p class="text-xs text-gray-400 mt-1">潮热、失眠、情绪波动等</p>
+                        </div>
+                        <div class="check-circle flex-shrink-0"></div>
+                    </div>
+                </div>
+
+                <div class="option-card cursor-pointer" onclick="selectOption(this)">
+                    <div class="flex items-center gap-4">
+                        <div class="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0" style="background:#f3ebee;">
+                            <i class="fas fa-moon text-xl" style="color:#E4B0B1;"></i>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="font-bold text-gray-800 text-base">我已经绝经</h3>
+                            <p class="text-xs text-gray-400 mt-1">关注绝经后的健康管理</p>
+                        </div>
+                        <div class="check-circle flex-shrink-0"></div>
+                    </div>
+                </div>
+
+                <div class="option-card cursor-pointer" onclick="selectOption(this)">
+                    <div class="flex items-center gap-4">
+                        <div class="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0" style="background:#f3ebee;">
+                            <i class="fas fa-lightbulb text-xl" style="color:#E4B0B1;"></i>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="font-bold text-gray-800 text-base">我只是想提前了解</h3>
+                            <p class="text-xs text-gray-400 mt-1">为未来做准备</p>
+                        </div>
+                        <div class="check-circle flex-shrink-0"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="fixed bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-white via-white to-transparent">
+            <button class="w-full bg-gray-100 text-gray-400 font-bold py-4 rounded-2xl transition-all" id="continueBtn" onclick="goNext()">
+                继续
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let selectedOption = null;
+        function selectOption(el) {
+            document.querySelectorAll('.option-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            el.classList.add('selected');
+            selectedOption = el;
+            document.getElementById('continueBtn').classList.remove('bg-gray-100', 'text-gray-400');
+            document.getElementById('continueBtn').classList.add('text-white', 'shadow-lg');
+            document.getElementById('continueBtn').style.background = 'linear-gradient(135deg, #E4B0B1 0%, #E4B0B1 100%)';
+        }
+        function goNext() {
+            if(selectedOption) {
+                document.getElementById('continueBtn').innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>加载中...';
+                setTimeout(() => { 
+                    // 这里原本是 alert，现在模拟跳转到 basic-info.html
+                    window.location.href = 'basic-info.html';
+                }, 500);
+            }
+        }
+    </script>
+</body>
+</html>

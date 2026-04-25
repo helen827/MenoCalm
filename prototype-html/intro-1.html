@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>介绍 1 - 潮安</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="theme-glass.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap');
+        * { font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif; }
+        body { margin: 0; padding: 0; background: #ffffff; overflow: hidden; }
+        .ios-status-bar { height: 54px; background: transparent; display: flex; justify-content: space-between; align-items: center; padding: 0 28px; padding-top: 18px; position: relative; z-index: 20; }
+        .page-bg { min-height: 100vh; background: linear-gradient(180deg, #fcf9fa 0%, #f5eef1 100%); }
+        .floating-bubble {
+            position: absolute;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 14px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.55);
+            color: #765d67;
+            font-size: 12px;
+            font-weight: 500;
+            box-shadow: 0 8px 24px rgba(132, 107, 118, 0.10);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            animation: float 6s ease-in-out infinite;
+            z-index: 8;
+        }
+        .floating-bubble i { color: #a78492; font-size: 12px; }
+        .bubble-1 { top: 110px; left: 6%; animation-delay: 0s; }
+        .bubble-2 { top: 145px; right: 7%; animation-delay: 1.5s; }
+        .bubble-3 { top: 210px; left: 14%; animation-delay: 0.8s; }
+        .bubble-4 { top: 246px; right: 13%; animation-delay: 2.3s; }
+        .bubble-5 { top: 300px; left: calc(50% - 40px); animation-delay: 1.2s; }
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0); }
+            33% { transform: translate(4px, -12px); }
+            66% { transform: translate(-4px, -6px); }
+        }
+        .dot { width: 7px; height: 7px; border-radius: 50%; background: #dbcdd3; }
+        .dot.active { background: #9f808d; }
+        .swipe-hint { font-size: 11px; color: #b09ea6; text-align: center; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <div class="ios-status-bar">
+        <span style="font-weight: 600; font-size: 15px; color: #3a3a3c;">9:41</span>
+        <div class="flex items-center gap-1.5" style="color: #3a3a3c;">
+            <i class="fas fa-signal text-xs"></i>
+            <i class="fas fa-wifi text-xs"></i>
+            <i class="fas fa-battery-full text-sm"></i>
+        </div>
+    </div>
+
+    <div class="page-bg px-8 pt-12 pb-10 flex flex-col items-center justify-between relative overflow-hidden">
+        <div class="floating-bubble bubble-1"><i class="fas fa-fire-alt"></i><span>潮热</span></div>
+        <div class="floating-bubble bubble-2"><i class="fas fa-tint-slash"></i><span>漏尿</span></div>
+        <div class="floating-bubble bubble-3"><i class="fas fa-cloud"></i><span>脑雾</span></div>
+        <div class="floating-bubble bubble-4"><i class="fas fa-heartbeat"></i><span>心悸</span></div>
+        <div class="floating-bubble bubble-5"><i class="fas fa-bed"></i><span>失眠</span></div>
+
+        <div class="w-full text-right">
+            <button class="text-xs text-gray-400" onclick="location.href='welcome.html'">跳过</button>
+        </div>
+
+        <div class="text-center relative z-10">
+            <div class="w-28 h-28 mx-auto rounded-3xl bg-white shadow-lg border border-white/80 flex items-center justify-center mb-8">
+                <i class="fas fa-book-open text-4xl" style="color:#a78492;"></i>
+            </div>
+            <h1 class="text-3xl font-bold text-gray-800 mb-4">先看懂更年期</h1>
+            <p class="text-gray-500 text-sm leading-relaxed">潮安用清晰易懂的内容，帮你理解身体变化，减少“是不是我有问题”的焦虑。</p>
+        </div>
+
+        <div class="w-full">
+            <div class="flex items-center justify-center gap-2 mb-5">
+                <span class="dot active"></span><span class="dot"></span><span class="dot"></span>
+            </div>
+            <p class="swipe-hint">左滑继续</p>
+        </div>
+    </div>
+    <script>
+        let touchStartX = 0;
+        document.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].clientX;
+        }, { passive: true });
+        document.addEventListener('touchend', (e) => {
+            const deltaX = e.changedTouches[0].clientX - touchStartX;
+            if (deltaX < -50) location.href = 'intro-2.html';
+        }, { passive: true });
+    </script>
+</body>
+</html>

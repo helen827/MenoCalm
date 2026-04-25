@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>自测结果 - 潮安</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="theme-glass.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap');
+        * { font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif; }
+        body { margin: 0; padding: 0; background: #ffffff; overflow: hidden; }
+        .ios-status-bar { height: 54px; background: #ffffff; display: flex; justify-content: space-between; align-items: center; padding: 0 28px; padding-top: 18px; }
+        .gradient-bg { background: linear-gradient(180deg, #fcf9fa 0%, #ffffff 100%); min-height: 100vh; }
+        .result-card { background: white; border-radius: 24px; padding: 28px; box-shadow: 0 8px 32px rgba(0,0,0,0.08); }
+        .result-badge { display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; border-radius: 20px; font-weight: 600; }
+        .action-card { background: white; border-radius: 16px; padding: 20px; display: flex; align-items: center; gap: 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.06); }
+        .mini-stat { border-radius: 14px; padding: 14px; background: #faf5f7; border: 1px solid rgba(118,93,103,0.12); }
+        .symptom-chip { display: inline-flex; align-items: center; gap: 6px; padding: 7px 10px; border-radius: 999px; font-size: 12px; color: #765d67; background: #f3ebee; border: 1px solid rgba(118,93,103,0.12); }
+        .meter-track { height: 8px; border-radius: 999px; background: #ede4e8; overflow: hidden; }
+        .meter-fill { height: 100%; width: 62%; background: linear-gradient(135deg, #E4B0B1, #E4B0B1); }
+    </style>
+</head>
+<body>
+    <div class="ios-status-bar">
+        <span style="font-weight: 600; font-size: 15px;">9:41</span>
+        <div class="flex items-center gap-1">
+            <i class="fas fa-signal text-sm"></i>
+            <i class="fas fa-wifi text-sm ml-1"></i>
+            <i class="fas fa-battery-full text-sm ml-1"></i>
+        </div>
+    </div>
+
+    <div class="gradient-bg min-h-screen pb-24">
+        <div class="px-6 pt-6">
+            <div class="text-center mb-6">
+                <div class="w-20 h-20 mx-auto rounded-full flex items-center justify-center mb-4" style="background: linear-gradient(135deg, #ece2e6, #d8c7ce);">
+                    <i class="fas fa-chart-line text-3xl text-rose-500"></i>
+                </div>
+                <h1 class="text-2xl font-bold text-gray-800 mb-2">自测完成</h1>
+                <p class="text-gray-500">以下是你的初步评估结果</p>
+            </div>
+
+            <div class="result-card mb-6">
+                <div class="result-badge mb-4" style="background: #fff3e0; color: #e65100;">
+                    <i class="fas fa-exclamation-circle"></i>
+                    中度相关
+                </div>
+
+                <h2 class="text-xl font-bold text-gray-800 mb-4">你的近期表现与围绝经期常见变化有一定相关</h2>
+
+                <div class="mb-4">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-sm font-semibold text-gray-700">相关程度</span>
+                        <span class="text-sm text-gray-500">62%</span>
+                    </div>
+                    <div class="meter-track">
+                        <div class="meter-fill"></div>
+                    </div>
+                </div>
+
+                <div class="flex flex-wrap gap-2">
+                    <span class="symptom-chip"><i class="fas fa-moon"></i>睡眠差</span>
+                    <span class="symptom-chip"><i class="fas fa-cloud"></i>脑雾</span>
+                    <span class="symptom-chip"><i class="fas fa-heart"></i>心悸</span>
+                    <span class="symptom-chip"><i class="fas fa-bolt"></i>疲惫</span>
+                </div>
+            </div>
+
+            <div class="bg-amber-50 rounded-2xl p-4 mb-6">
+                <div class="flex items-start gap-3">
+                    <i class="fas fa-lightbulb text-amber-500 mt-1"></i>
+                    <div>
+                        <p class="font-medium text-amber-800 text-sm">温馨提示</p>
+                        <p class="text-amber-700 text-sm mt-1">围绝经期是正常的生理阶段。一些症状可以通过生活方式调整得到缓解，想要彻底消除，需要专业的医疗帮助例如HRT荷尔蒙治疗。</p>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="font-semibold text-gray-800 mb-3">推荐开始</h3>
+            <div class="space-y-3">
+                <div class="action-card cursor-pointer" onclick="location.href='practice-detail.html'">
+                    <div class="w-12 h-12 rounded-full bg-rose-100 flex items-center justify-center">
+                        <i class="fas fa-wind text-rose-500"></i>
+                    </div>
+                    <div class="flex-1">
+                        <h4 class="font-semibold text-gray-800">呼吸练习</h4>
+                        <p class="text-xs text-gray-400">立即开始 4-7-8 节奏</p>
+                    </div>
+                    <i class="fas fa-chevron-right text-gray-300"></i>
+                </div>
+
+                <div class="action-card cursor-pointer" onclick="location.href='home.html'">
+                    <div class="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center">
+                        <i class="fas fa-comments text-purple-500"></i>
+                    </div>
+                    <div class="flex-1">
+                        <h4 class="font-semibold text-gray-800">开始AI对话记录</h4>
+                        <p class="text-xs text-gray-400">通过对话记录今天的身体变化</p>
+                    </div>
+                    <i class="fas fa-chevron-right text-gray-300"></i>
+                </div>
+
+                <div class="action-card cursor-pointer" onclick="location.href='learn.html'">
+                    <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
+                        <i class="fas fa-book-open text-blue-500"></i>
+                    </div>
+                    <div class="flex-1">
+                        <h4 class="font-semibold text-gray-800">科普知识</h4>
+                        <p class="text-xs text-gray-400">了解症状背后的机制</p>
+                    </div>
+                    <i class="fas fa-chevron-right text-gray-300"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-white via-white to-transparent">
+            <button class="w-full bg-rose-400 text-white font-semibold py-4 rounded-full shadow-lg flex items-center justify-center gap-2" onclick="location.href='home.html'">
+                <i class="fas fa-comments"></i>
+                开始AI对话记录
+            </button>
+        </div>
+    </div>
+</body>
+</html>

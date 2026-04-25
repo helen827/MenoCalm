@@ -1,0 +1,151 @@
+name: CI Gates
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - master
+
+jobs:
+  build:
+    name: Build
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Select Xcode
+        run: sudo xcode-select -switch /Applications/Xcode.app
+      - name: Build App
+        run: >
+          xcodebuild
+          -project "潮安.xcodeproj"
+          -scheme "潮安"
+          -destination 'platform=iOS Simulator,name=iPhone 17'
+          build
+
+  unit-tests:
+    name: Unit Tests
+    runs-on: macos-15
+    needs: build
+    steps:
+      - uses: actions/checkout@v4
+      - name: Select Xcode
+        run: sudo xcode-select -switch /Applications/Xcode.app
+      - name: Run Unit Tests
+        run: >
+          mkdir -p artifacts &&
+          xcodebuild
+          -project "潮安.xcodeproj"
+          -scheme "潮安"
+          -destination 'platform=iOS Simulator,name=iPhone 17'
+          -only-testing:潮安Tests
+          -resultBundlePath artifacts/unit-tests.xcresult
+          test
+      - name: Summarize Unit Test Failures
+        if: always()
+        run: |
+          python3 .github/summarize_xcresult.py \
+            --title "Unit Tests Summary" \
+            --bundle "artifacts/unit-tests.xcresult"
+      - name: Upload Unit Test xcresult
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-tests-xcresult
+          path: artifacts/unit-tests.xcresult
+          if-no-files-found: ignore
+          retention-days: 7
+
+  ui-smoke:
+    name: UI Smoke
+    runs-on: macos-15
+    needs: unit-tests
+    steps:
+      - uses: actions/checkout@v4
+      - name: Select Xcode
+        run: sudo xcode-select -switch /Applications/Xcode.app
+      - name: Run UI Smoke Test
+        run: >
+          mkdir -p artifacts &&
+          xcodebuild
+          -project "潮安.xcodeproj"
+          -scheme "潮安"
+          -destination 'platform=iOS Simulator,name=iPhone 17'
+          -only-testing:潮安UITests/__UITests/testExample
+          -resultBundlePath artifacts/ui-smoke.xcresult
+          test
+      - name: Summarize UI Smoke Failures
+        if: always()
+        run: |
+          python3 .github/summarize_xcresult.py \
+            --title "UI Smoke Summary" \
+            --bundle "artifacts/ui-smoke.xcresult"
+      - name: Upload UI Smoke xcresult
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ui-smoke-xcresult
+          path: artifacts/ui-smoke.xcresult
+          if-no-files-found: ignore
+          retention-days: 7
+
+  medical-eval:
+    name: Medical Reliability Eval
+    runs-on: macos-15
+    needs: unit-tests
+    steps:
+      - uses: actions/checkout@v4
+      - name: Select Xcode
+        run: sudo xcode-select -switch /Applications/Xcode.app
+      - name: Safety Guard Regression Gate
+        run: >
+          mkdir -p artifacts &&
+          xcodebuild
+          -project "潮安.xcodeproj"
+          -scheme "潮安"
+          -destination 'platform=iOS Simulator,name=iPhone 17'
+          -only-testing:潮安Tests/__Tests/medicalReliability_safetyGuardRegressionSet_meetsThreshold
+          -resultBundlePath artifacts/medical-safety-eval.xcresult
+          test
+      - name: RAG Citation Regression Gate
+        run: >
+          mkdir -p artifacts &&
+          xcodebuild
+          -project "潮安.xcodeproj"
+          -scheme "潮安"
+          -destination 'platform=iOS Simulator,name=iPhone 17'
+          -only-testing:潮安Tests/__Tests/medicalReliability_ragResponseIncludesCitations_forLowRiskInputs
+          -resultBundlePath artifacts/medical-rag-eval.xcresult
+          test
+      - name: Dataset-level Medical Gate
+        run: >
+          mkdir -p artifacts &&
+          xcodebuild
+          -project "潮安.xcodeproj"
+          -scheme "潮安"
+          -destination 'platform=iOS Simulator,name=iPhone 17'
+          -only-testing:潮安Tests/__Tests/week4_medicalReliability_datasetGate_meetsThresholds
+          -resultBundlePath artifacts/medical-dataset-eval.xcresult
+          test
+      - name: Summarize Medical Eval Failures
+        if: always()
+        run: |
+          echo "### Medical Eval Summary" >> "$GITHUB_STEP_SUMMARY"
+          for bundle in artifacts/medical-safety-eval.xcresult artifacts/medical-rag-eval.xcresult artifacts/medical-dataset-eval.xcresult; do
+            echo "- Bundle: \`$bundle\`" >> "$GITHUB_STEP_SUMMARY"
+            python3 .github/summarize_xcresult.py \
+              --title "" \
+              --bundle "$bundle" \
+              --prefix "  - "
+          done
+      - name: Upload Medical Eval xcresult
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: medical-eval-xcresult
+          path: |
+            artifacts/medical-safety-eval.xcresult
+            artifacts/medical-rag-eval.xcresult
+            artifacts/medical-dataset-eval.xcresult
+          if-no-files-found: ignore
+          retention-days: 7

@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>社区 - 潮安</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="theme-glass.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap');
+        * { font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif; }
+        body { margin: 0; padding: 0; background: radial-gradient(circle at 20% 10%, #fffaff 0%, #f8f4f8 38%, #f2ecef 100%); overflow: hidden; position: relative; }
+        body::before { content: ''; position: absolute; width: 320px; height: 320px; right: -170px; top: -40px; background: radial-gradient(circle, rgba(231,203,216,0.54), rgba(231,203,216,0)); filter: blur(52px); pointer-events: none; z-index: 0; }
+        body::after { content: ''; position: absolute; width: 290px; height: 290px; left: -130px; bottom: 40px; background: radial-gradient(circle, rgba(176,216,255,0.64), rgba(176,216,255,0)); filter: blur(46px); pointer-events: none; z-index: 0; }
+        .ios-status-bar { height: 54px; background: transparent; display: flex; justify-content: space-between; align-items: center; padding: 0 28px; padding-top: 18px; position: relative; z-index: 12; }
+        .content-area { height: calc(100vh - 54px - 76px); overflow-y: auto; position: relative; z-index: 2; }
+        .top-filter { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+        .seg { border: 1px solid rgba(255,255,255,0.88); background: rgba(255,255,255,0.48); color: #7c6973; font-size: 13px; border-radius: 999px; padding: 7px 14px; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); box-shadow: 0 10px 20px rgba(138,114,125,0.10); }
+        .seg.active { color: #2d242d; border-color: rgba(255,255,255,0.95); font-weight: 600; background: rgba(255,255,255,0.62); }
+        .search-bar { flex: 1; height: 36px; border-radius: 18px; background: rgba(255,255,255,0.50); border: 1px solid rgba(255,255,255,0.9); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); display: flex; align-items: center; gap: 8px; padding: 0 12px; color: #8f8087; font-size: 13px; }
+        .waterfall { column-count: 2; column-gap: 10px; }
+        .note-card { break-inside: avoid; margin-bottom: 12px; border-radius: 24px; overflow: hidden; background: rgba(255,255,255,0.42); border: 1px solid rgba(255,255,255,0.9); backdrop-filter: blur(40px) saturate(165%); -webkit-backdrop-filter: blur(40px) saturate(165%); box-shadow: inset 0 2px 20px rgba(255,255,255,0.52), 0 16px 30px rgba(138,114,125,0.11); padding: 8px; }
+        .note-cover { width: 100%; object-fit: cover; display: block; border-radius: 8px; }
+        .note-title { font-size: 15px; line-height: 1.35; color: #222; font-weight: 600; margin-top: 8px; }
+        .note-meta { display: flex; align-items: center; justify-content: space-between; margin-top: 6px; font-size: 12px; color: #888; }
+        .author { display: flex; align-items: center; gap: 6px; min-width: 0; }
+        .author img { width: 20px; height: 20px; border-radius: 50%; object-fit: cover; }
+        .author span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 72px; }
+        .tab-bar { position: fixed; bottom: 0; left: 0; right: 0; height: 76px; background: rgba(255,255,255,0.34); backdrop-filter: blur(30px); border-top: 0; display: flex; justify-content: space-around; align-items: center; padding-top: 0; z-index: 20; box-shadow: 0 -6px 14px rgba(138,114,125,0.05); }
+        .tab-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: #8e8e93; font-size: 10px; }
+        .tab-item i { font-size: 21px; }
+        .tab-item.active { color: #E4B0B1; }
+        .badge { display: inline-block; padding: 2px 6px; border-radius: 999px; background: rgba(255,255,255,0.56); border: 1px solid rgba(255,255,255,0.92); color: #755f6b; font-size: 10px; margin-top: 4px; }
+    </style>
+</head>
+<body class="has-tab">
+    <div class="ios-status-bar">
+        <span style="font-weight: 600; font-size: 15px;">16:02</span>
+        <div class="flex items-center gap-1">
+            <i class="fas fa-signal text-sm"></i>
+            <i class="fas fa-wifi text-sm ml-1"></i>
+            <i class="fas fa-battery-three-quarters text-sm ml-1"></i>
+        </div>
+    </div>
+
+    <div class="content-area">
+        <div class="px-4 pt-1 pb-4">
+            <div class="flex items-center justify-between mb-3">
+                <h1 class="text-2xl font-bold text-gray-900">社区</h1>
+                <button class="w-10 h-10 rounded-full border border-gray-200 text-gray-600" onclick="location.href='community-post.html'">
+                    <i class="fas fa-plus"></i>
+                </button>
+            </div>
+
+            <div class="top-filter">
+                <button class="seg active">官方</button>
+                <button class="seg">用户</button>
+                <div class="search-bar">
+                    <i class="fas fa-search text-xs"></i>
+                    <span>搜索内容</span>
+                </div>
+            </div>
+
+            <div class="waterfall">
+                <article class="note-card cursor-pointer" onclick="location.href='article-detail.html'">
+                    <img class="note-cover" style="height: 188px;" src="https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=600&h=720&fit=crop" alt="official note">
+                    <p class="note-title">斯坦福教授：围绝经期女性饮食与运动 11 条建议</p>
+                    <span class="badge">官方科普</span>
+                    <div class="note-meta">
+                        <div class="author">
+                            <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop" alt="avatar">
+                            <span>潮安健康编辑部</span>
+                        </div>
+                        <span><i class="far fa-heart"></i> 1,176</span>
+                    </div>
+                </article>
+
+                <article class="note-card cursor-pointer" onclick="location.href='community-post-detail.html'">
+                    <img class="note-cover" style="height: 238px;" src="https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=600&h=900&fit=crop" alt="user note">
+                    <p class="note-title">为了约会，和 date 的沪爷勇闯健身房 3 小时</p>
+                    <span class="badge">用户分享</span>
+                    <div class="note-meta">
+                        <div class="author">
+                            <img src="https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=80&h=80&fit=crop" alt="avatar">
+                            <span>YJ 水镜黄金</span>
+                        </div>
+                        <span><i class="far fa-heart"></i> 663</span>
+                    </div>
+                </article>
+
+                <article class="note-card cursor-pointer" onclick="location.href='community-post-detail.html'">
+                    <img class="note-cover" style="height: 170px;" src="https://images.unsplash.com/photo-1499951360447-b19be8fe80f5?w=600&h=650&fit=crop" alt="user note">
+                    <p class="note-title">何海东：人在家中坐，钱从四面八方来（更年期自我对话）</p>
+                    <span class="badge">用户分享</span>
+                    <div class="note-meta">
+                        <div class="author">
+                            <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=80&h=80&fit=crop" alt="avatar">
+                            <span>热点观察员</span>
+                        </div>
+                        <span><i class="far fa-heart"></i> 148</span>
+                    </div>
+                </article>
+
+                <article class="note-card cursor-pointer" onclick="location.href='article-detail.html'">
+                    <img class="note-cover" style="height: 214px;" src="https://images.unsplash.com/photo-1508672019048-805c876b67e2?w=600&h=820&fit=crop" alt="official note">
+                    <p class="note-title">脑雾不是“变笨”：4 个可执行的日常改善方法</p>
+                    <span class="badge">官方科普</span>
+                    <div class="note-meta">
+                        <div class="author">
+                            <img src="https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=80&h=80&fit=crop" alt="avatar">
+                            <span>潮安医学顾问</span>
+                        </div>
+                        <span><i class="far fa-heart"></i> 2,031</span>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </div>
+
+    <div class="tab-bar">
+        <div class="tab-item" onclick="location.href='home.html'">
+            <i class="fas fa-comments"></i>
+            <span>AI对话</span>
+        </div>
+        <div class="tab-item active" onclick="location.href='learn.html'">
+            <i class="fas fa-users"></i>
+            <span>社区</span>
+        </div>
+        <div class="tab-item" onclick="location.href='practice.html'">
+            <i class="fas fa-wind"></i>
+            <span>呼吸练习</span>
+        </div>
+        <div class="tab-item" onclick="location.href='profile.html'">
+            <i class="fas fa-chart-pie"></i>
+            <span>我的</span>
+        </div>
+    </div>
+</body>
+</html>

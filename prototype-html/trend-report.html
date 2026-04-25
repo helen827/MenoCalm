@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>趋势报告 - 潮安</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="theme-glass.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap');
+        * { font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif; }
+        body { margin: 0; padding: 0; background: #ffffff; overflow: hidden; }
+        .ios-status-bar { height: 54px; background: #ffffff; display: flex; justify-content: space-between; align-items: center; padding: 0 28px; padding-top: 18px; }
+        .content-area { height: calc(100vh - 54px); overflow-y: auto; padding-bottom: 20px; }
+        .time-tabs { display: flex; gap: 8px; }
+        .time-tab { padding: 8px 16px; border-radius: 20px; font-size: 14px; cursor: pointer; transition: all 0.2s; }
+        .time-tab.active { background: #E4B0B1; color: white; }
+        .time-tab:not(.active) { background: #F7F3F3; color: #6F6A6C; }
+        .stat-card { background: #F7F3F3; border-radius: 16px; padding: 16px; box-shadow: 0 2px 8px rgba(47,43,44,0.06); }
+        .chart-placeholder { height: 120px; background: linear-gradient(180deg, #f6eef1 0%, #fff 100%); border-radius: 12px; display: flex; align-items: center; justify-content: flex-end; padding: 12px; }
+        .bar { width: 12px; border-radius: 6px; background: linear-gradient(180deg, #E4B0B1, #E9E1E3); }
+        .insight-tag { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 12px; font-size: 12px; }
+    </style>
+</head>
+<body class="has-tab">
+    <div class="ios-status-bar">
+        <span style="font-weight: 600; font-size: 15px;">9:41</span>
+        <div class="flex items-center gap-1">
+            <i class="fas fa-signal text-sm"></i>
+            <i class="fas fa-wifi text-sm ml-1"></i>
+            <i class="fas fa-battery-full text-sm ml-1"></i>
+        </div>
+    </div>
+
+    <div class="content-area pb-6">
+        <div class="px-6 pt-2">
+            <div class="flex items-center gap-3 mb-6">
+                <button class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center" onclick="location.href='profile.html'">
+                    <i class="fas fa-arrow-left text-gray-600"></i>
+                </button>
+                <h1 class="text-xl font-bold text-gray-800">本周身体变化趋势</h1>
+            </div>
+
+            <div class="time-tabs mb-6">
+                <div class="time-tab">7天</div>
+                <div class="time-tab active">30天</div>
+                <div class="time-tab">90天</div>
+            </div>
+
+            <div class="bg-gradient-to-r from-rose-100 to-purple-100 rounded-2xl p-5 mb-6">
+                <div class="flex items-center gap-2 mb-2">
+                    <i class="fas fa-chart-line text-white"></i>
+                    <span class="text-white font-medium">本周概况</span>
+                </div>
+                <p class="text-white/90 text-sm leading-relaxed">
+                    过去 7 天，你记录了 <span class="font-bold">5 天</span>。最常出现的症状是<span class="font-bold">睡眠差</span>和<span class="font-bold">焦虑</span>。
+                </p>
+            </div>
+
+            <div class="stat-card mb-6">
+                <h3 class="font-semibold text-gray-800 mb-4">高频症状</h3>
+                <div class="flex gap-2 mb-4">
+                    <span class="insight-tag bg-rose-100 text-rose-600">
+                        <i class="fas fa-moon"></i> 睡眠差 (5次)
+                    </span>
+                    <span class="insight-tag bg-purple-100 text-purple-600">
+                        <i class="fas fa-bolt"></i> 焦虑 (4次)
+                    </span>
+                </div>
+                <div class="flex gap-2">
+                    <span class="insight-tag bg-amber-100 text-amber-600">
+                        <i class="fas fa-fire"></i> 潮热 (2次)
+                    </span>
+                    <span class="insight-tag bg-gray-100 text-gray-600">
+                        <i class="fas fa-tired"></i> 疲惫 (3次)
+                    </span>
+                </div>
+            </div>
+
+            <div class="stat-card mb-6">
+                <h3 class="font-semibold text-gray-800 mb-4">睡眠趋势</h3>
+                <div class="flex items-end justify-between h-24 px-2">
+                    <div class="flex flex-col items-center gap-1">
+                        <div class="bar" style="height: 40px;"></div>
+                        <span class="text-xs text-gray-400">一</span>
+                    </div>
+                    <div class="flex flex-col items-center gap-1">
+                        <div class="bar" style="height: 60px;"></div>
+                        <span class="text-xs text-gray-400">二</span>
+                    </div>
+                    <div class="flex flex-col items-center gap-1">
+                        <div class="bar" style="height: 80px;"></div>
+                        <span class="text-xs text-gray-400">三</span>
+                    </div>
+                    <div class="flex flex-col items-center gap-1">
+                        <div class="bar" style="height: 50px;"></div>
+                        <span class="text-xs text-gray-400">四</span>
+                    </div>
+                    <div class="flex flex-col items-center gap-1">
+                        <div class="bar" style="height: 70px;"></div>
+                        <span class="text-xs text-gray-400">五</span>
+                    </div>
+                    <div class="flex flex-col items-center gap-1">
+                        <div class="bar" style="height: 90px;"></div>
+                        <span class="text-xs text-gray-400">六</span>
+                    </div>
+                    <div class="flex flex-col items-center gap-1">
+                        <div class="bar" style="height: 30px;"></div>
+                        <span class="text-xs text-gray-400">日</span>
+                    </div>
+                </div>
+                <p class="text-xs text-gray-400 mt-3 text-center">柱状图表示睡眠问题严重程度</p>
+            </div>
+
+            <div class="stat-card mb-6">
+                <h3 class="font-semibold text-gray-800 mb-4">可能触发因素</h3>
+                <div class="bg-amber-50 rounded-xl p-4">
+                    <div class="flex items-start gap-3">
+                        <div class="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-lightbulb text-amber-500 text-sm"></i>
+                        </div>
+                        <div>
+                            <p class="text-amber-800 text-sm leading-relaxed">
+                                过去 7 天，你有 <span class="font-bold">3 次潮热</span>发生在熬夜后的第二天。睡眠不足可能是你的潮热触发因素之一。
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-blue-50 rounded-xl p-4 mt-3">
+                    <div class="flex items-start gap-3">
+                        <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-info text-blue-500 text-sm"></i>
+                        </div>
+                        <div>
+                            <p class="text-blue-800 text-sm leading-relaxed">
+                                你在饮用咖啡后记录潮热的次数较多（4次），可以继续观察这个关联。
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stat-card mb-6" id="voiceInsightCard" style="display:none;">
+                <h3 class="font-semibold text-gray-800 mb-2">语音日记洞察</h3>
+                <p class="text-xs text-gray-400 mb-4">基于你持续的“语音自述日记”，自动总结生活方式与症状规律</p>
+                <div id="voiceInsightsList" class="space-y-2 text-sm text-gray-600"></div>
+            </div>
+
+            <div class="stat-card mb-6">
+                <h3 class="font-semibold text-gray-800 mb-4">推荐下一步</h3>
+                <div class="space-y-3">
+                    <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl cursor-pointer">
+                        <div class="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
+                            <i class="fas fa-moon text-purple-500"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="font-medium text-gray-800 text-sm">尝试睡前身体扫描</p>
+                            <p class="text-xs text-gray-400">帮助改善睡眠质量</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl cursor-pointer">
+                        <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
+                            <i class="fas fa-coffee text-green-500"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="font-medium text-gray-800 text-sm">减少咖啡因摄入</p>
+                            <p class="text-xs text-gray-400">观察是否减少潮热</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <button class="w-full py-3 bg-rose-400 text-white rounded-full font-semibold flex items-center justify-center gap-2">
+                <i class="fas fa-notes-medical"></i>
+                生成就医清单
+            </button>
+        </div>
+    </div>
+
+    <div class="tab-bar">
+        <div class="tab-item" onclick="location.href='home.html'">
+            <i class="fas fa-comments"></i>
+            <span>AI对话</span>
+        </div>
+        <div class="tab-item" onclick="location.href='learn.html'">
+            <i class="fas fa-users"></i>
+            <span>社区</span>
+        </div>
+        <div class="tab-item" onclick="location.href='practice.html'">
+            <i class="fas fa-wind"></i>
+            <span>呼吸练习</span>
+        </div>
+        <div class="tab-item active" onclick="location.href='profile.html'">
+            <i class="fas fa-chart-pie"></i>
+            <span>我的</span>
+        </div>
+    </div>
+
+    <script>
+        const STORAGE_KEY = 'chaoan_journal_entries_v1';
+        function safeParse(raw) { try { return JSON.parse(raw); } catch { return []; } }
+        function loadEntries() {
+            const arr = safeParse(localStorage.getItem(STORAGE_KEY) || '[]');
+            return Array.isArray(arr) ? arr : [];
+        }
+        const entries = loadEntries().slice(-30);
+        if (entries.length) {
+            const card = document.getElementById('voiceInsightCard');
+            const list = document.getElementById('voiceInsightsList');
+            card.style.display = 'block';
+
+            const symptomCount = {};
+            const triggerCount = {};
+            const pairCount = {};
+
+            for (const e of entries) {
+                const ex = e.extracted || {};
+                const symptoms = Array.isArray(ex.symptoms) ? ex.symptoms : [];
+                const triggers = Array.isArray(ex.triggers) ? ex.triggers : [];
+                for (const s of symptoms) symptomCount[s] = (symptomCount[s] || 0) + 1;
+                for (const t of triggers) triggerCount[t] = (triggerCount[t] || 0) + 1;
+                for (const s of symptoms) for (const t of triggers) pairCount[`${s}__${t}`] = (pairCount[`${s}__${t}`] || 0) + 1;
+            }
+
+            const topSymptoms = Object.entries(symptomCount).sort((a,b) => b[1]-a[1]).slice(0, 2);
+            if (topSymptoms.length) {
+                const row = document.createElement('div');
+                row.textContent = `近 ${entries.length} 条语音日记中，高频症状：${topSymptoms.map(([s,c]) => `${s}（${c}次）`).join('、')}。`;
+                list.appendChild(row);
+            }
+
+            const topPairs = Object.entries(pairCount).sort((a,b) => b[1]-a[1]).slice(0, 2);
+            for (const [k, c] of topPairs) {
+                const [s, t] = k.split('__');
+                const row = document.createElement('div');
+                row.textContent = `“${t}”被提到的日子里，“${s}”也同时出现了 ${c} 次。`;
+                list.appendChild(row);
+            }
+
+            if (!list.childElementCount) {
+                const row = document.createElement('div');
+                row.textContent = '继续记录更多语音日记后，这里会出现更稳定的规律总结。';
+                list.appendChild(row);
+            }
+        }
+    </script>
+</body>
+</html>

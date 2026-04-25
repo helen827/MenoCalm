@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>欢迎 - 潮安</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="theme-glass.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap');
+        * { font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif; }
+        body { margin: 0; padding: 0; background: #ffffff; overflow: hidden; }
+        .ios-status-bar { height: 54px; background: transparent; display: flex; justify-content: space-between; align-items: center; padding: 0 28px; padding-top: 18px; z-index: 50; position: relative; }
+        .gradient-bg { background: linear-gradient(180deg, #fcf9fa 0%, #f6eef1 48%, #f2e8ec 100%); min-height: 100vh; }
+        .blob { position: absolute; border-radius: 50%; opacity: 0.4; filter: blur(60px); z-index: 1; }
+        .logo-container {
+            background: white;
+            box-shadow: 0 16px 36px rgba(132, 107, 118, 0.16);
+            border: 4px solid rgba(255, 255, 255, 0.8);
+        }
+        .value-card { 
+            background: rgba(255, 255, 255, 0.65); 
+            backdrop-filter: blur(20px); 
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 24px; 
+            padding: 20px; 
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 10px 28px rgba(34, 29, 32, 0.04);
+            transition: transform 0.3s ease;
+        }
+        .value-card:active { transform: scale(0.98); }
+        .main-btn {
+            background: linear-gradient(135deg, #E4B0B1 0%, #E4B0B1 100%);
+            box-shadow: 0 12px 30px rgba(132, 107, 118, 0.24);
+        }
+        .login-btn {
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(118, 93, 103, 0.16);
+            border-radius: 18px;
+            padding: 12px 14px;
+            font-weight: 700;
+            color: #765d67;
+            box-shadow: 0 10px 24px rgba(44, 34, 39, 0.08);
+        }
+        .login-btn-wechat {
+            background: #f3ebee;
+            border: 1px solid rgba(118, 93, 103, 0.12);
+            border-radius: 18px;
+            padding: 12px 14px;
+            font-weight: 700;
+            color: #7a6a70;
+        }
+        .auth-sheet { width: 100%; max-width: 360px; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+        .auth-title { font-size: 15px; font-weight: 700; color: #6f5e66; text-align: center; }
+        .auth-btn { width: 100%; background: rgba(255,255,255,0.95); border: 1px solid rgba(118,93,103,0.14); border-radius: 999px; padding: 12px 16px; font-weight: 700; color: #6f5e66; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .auth-btn-wechat { background: #f3ebee; color: #7a6a70; }
+        .auth-foot { font-size: 12px; color: #8b7c83; }
+        .auth-link { font-weight: 700; color: #6f5e66; text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <div class="ios-status-bar">
+        <span style="font-weight: 600; font-size: 15px; color: #3a3a3c;">9:41</span>
+        <div class="flex items-center gap-1.5" style="color: #3a3a3c;">
+            <i class="fas fa-signal text-xs"></i>
+            <i class="fas fa-wifi text-xs"></i>
+            <i class="fas fa-battery-full text-sm"></i>
+        </div>
+    </div>
+
+    <div class="gradient-bg min-h-screen pb-20 relative overflow-hidden">
+        <div class="blob w-80 h-80 bg-rose-100 top-0 -left-20"></div>
+        <div class="blob w-72 h-72 bg-rose-100 bottom-20 -right-10"></div>
+        
+        <div class="relative z-10 flex flex-col items-center pt-44 px-8">
+            <div class="logo-container w-20 h-20 rounded-3xl flex items-center justify-center mb-8 rotate-3">
+                <i class="fas fa-spa text-4xl" style="color:#a78492;"></i>
+            </div>
+
+            <h1 class="text-4xl font-bold text-gray-800 mb-3 tracking-tight">潮安</h1>
+            <p class="text-gray-500 text-base font-medium mb-8 text-center">继续前，请先登录或注册</p>
+
+            <div class="auth-sheet mt-5">
+                <div class="auth-title">创建账号以保存你的记录与报告</div>
+                <button class="auth-btn">
+                    <i class="fas fa-mobile-alt"></i>
+                    使用手机号注册
+                </button>
+                <button class="auth-btn auth-btn-wechat">
+                    <i class="fab fa-weixin"></i>
+                    使用微信号注册
+                </button>
+                <div class="auth-foot">已有账号？<span class="auth-link">登录</span></div>
+                <button class="main-btn w-full py-3 rounded-2xl text-white text-sm font-semibold" onclick="location.href='home.html'">
+                    登录后进入潮安
+                </button>
+            </div>
+
+            <p class="text-[11px] text-gray-400 mt-5 max-w-[300px] text-center leading-relaxed">
+                潮安提供的是健康支持与自我管理工具，不替代医生诊疗。
+            </p>
+        </div>
+    </div>
+</body>
+</html>

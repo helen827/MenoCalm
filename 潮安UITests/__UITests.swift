@@ -24,13 +24,20 @@ final class __UITests: XCTestCase {
 
     @MainActor
     func testExample() throws {
-        // UI tests must launch the application that they test.
         let app = XCUIApplication()
         app.launch()
 
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
-        // XCUIAutomation Documentation
-        // https://developer.apple.com/documentation/xcuiautomation
+        // Minimal main-flow smoke check: onboarding -> login -> home.
+        let skipButton = app.buttons["跳过"]
+        XCTAssertTrue(skipButton.waitForExistence(timeout: 3))
+        skipButton.tap()
+
+        let enterButton = app.buttons["登录后进入潮安"]
+        XCTAssertTrue(enterButton.waitForExistence(timeout: 3))
+        enterButton.tap()
+
+        XCTAssertTrue(app.staticTexts["AI对话"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.buttons["我的"].waitForExistence(timeout: 3))
     }
 
     @MainActor
