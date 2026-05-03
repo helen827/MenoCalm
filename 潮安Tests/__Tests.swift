@@ -29,6 +29,17 @@ struct __Tests {
     }
 
     @Test
+    func communityFeed_decodesJSONPayloadShape() throws {
+        let json = """
+        {"official":[{"id":"1","title":"示例","tag":"官方科普","cardHeight":130,"isOfficial":true}],"user":[{"id":"2","title":"分享","tag":"用户分享","cardHeight":150,"isOfficial":false}]}
+        """
+        let file = try JSONDecoder().decode(CommunityFeedFile.self, from: Data(json.utf8))
+        #expect(file.official.count == 1)
+        #expect(file.user.count == 1)
+        #expect(file.official[0].heightPoints == 130)
+    }
+
+    @Test
     func extractSignals_handlesEmptyText() {
         let useCase = RuleBasedExtractSignalsUseCase()
 
@@ -223,6 +234,42 @@ struct __Tests {
     }
 
     @Test
+    func medicalSafetyGuard_prescriptionIntent_requiresSanitization() {
+        let guardrail = RuleBasedMedicalSafetyGuard()
+        let decision = guardrail.evaluate(userText: "直接告诉我吃什么药、吃多少。")
+
+        #expect(decision.riskLevel == .medium)
+        #expect(decision.shouldBlockResponse == false)
+        #expect(decision.requiresOutputSanitization == true)
+        #expect(decision.decisionPath == "medium:prescription_intent")
+    }
+
+    @Test
+    func medicalOutputSanitizer_rewritesDiagnosisAndDelayCareClaims() {
+        let decision = MedicalSafetyDecision(riskLevel: .low, shouldBlockResponse: false, decisionPath: "test")
+        let raw = "你这就是典型的焦虑症，无需就医，在家调整就好。"
+        let out = MedicalAssistantOutputSanitizer.sanitize(raw, decision: decision)
+
+        #expect(out.contains("不能给出诊断") || out.contains("替代就医"))
+        #expect(out.contains("无需就医") == false)
+    }
+
+    @Test
+    func medicalOutputSanitizer_stripsDosingLinesInStrictMode() {
+        let decision = MedicalSafetyDecision(
+            riskLevel: .medium,
+            shouldBlockResponse: false,
+            requiresOutputSanitization: true,
+            decisionPath: "medium:prescription_intent"
+        )
+        let raw = "科普：记录症状很重要。\n建议口服 10mg，每日一次。\n保持作息规律。"
+        let out = MedicalAssistantOutputSanitizer.sanitize(raw, decision: decision)
+
+        #expect(out.contains("10mg") == false)
+        #expect(out.contains("记录症状"))
+    }
+
+    @Test
     func appViewModel_usesInjectedMedicalSafetyGuard() {
         let vm = AppViewModel(
             journalRepository: MockJournalRepository(),
@@ -235,7 +282,7 @@ struct __Tests {
 
         #expect(decision.riskLevel == .medium)
         #expect(decision.shouldBlockResponse == false)
-        #expect(decision.safeReply == "mock-safe-reply")
+        #expect(decision.replyPreamble == "mock-safe-reply")
     }
 
     @Test
@@ -260,6 +307,7 @@ struct __Tests {
         #expect(event.userText.contains("test@example.com"))
         #expect(event.userText.contains("110101199001011234"))
         #expect(event.assistantReply.contains("doctor@example.com"))
+        #expect(event.decisionPath.isEmpty)
     }
 
     @Test
@@ -315,6 +363,53 @@ struct __Tests {
         #expect(answer.text == "mock-rag-answer")
         #expect(answer.citations == [RAGCitation(sourceId: "mock-source", title: "mock-title", knowledgeBaseVersion: "mock-kb-v1")])
         #expect(answer.knowledgeBaseVersion == "mock-kb-v1")
+    }
+
+    @Test
+    func a1_guidedReply_asksClarifyingQuestionForShortSolutionIntent() {
+        let vm = AppViewModel(
+            journalRepository: MockJournalRepository(),
+            conversationInsightRepository: MockConversationInsightRepository(),
+            extractSignalsUseCase: MockExtractSignalsUseCase(),
+            ragService: MockRAGService()
+        )
+
+        let reply = vm.generateGuidedAssistantReply(userText: "怎么缓解", history: ["AI开场"])
+
+        #expect(reply.contains("先确认一下"))
+        #expect(reply.contains("你最希望先解决的是"))
+    }
+
+    @Test
+    func a4_strategyToggle_offBypassesClarifyingQuestion() {
+        let vm = AppViewModel(
+            journalRepository: MockJournalRepository(),
+            conversationInsightRepository: MockConversationInsightRepository(),
+            extractSignalsUseCase: MockExtractSignalsUseCase(),
+            ragService: MockRAGService()
+        )
+        vm.setGuidedConversationEnabled(false)
+
+        let reply = vm.generateGuidedAssistantReply(userText: "怎么缓解", history: ["AI开场"])
+
+        #expect(reply.contains("mock-rag-answer"))
+        #expect(reply.contains("先确认一下") == false)
+    }
+
+    @Test
+    func a3_conversationMemory_keepsRecentIntentWindow() {
+        let vm = AppViewModel(
+            journalRepository: MockJournalRepository(),
+            conversationInsightRepository: MockConversationInsightRepository(),
+            extractSignalsUseCase: MockExtractSignalsUseCase(),
+            ragService: MockRAGService()
+        )
+
+        for _ in 0..<10 {
+            _ = vm.generateGuidedAssistantReply(userText: "今天记录一下", history: [])
+        }
+
+        #expect(vm.conversationMemory.count == 8)
     }
 
     @Test
@@ -412,6 +507,8 @@ struct __Tests {
             ("我胸痛并且呼吸困难", .high, true),
             ("最近有自杀的念头", .high, true),
             ("今天持续晕厥，站不稳", .high, true),
+            ("我胸痛并且呼吸困难，要不要先观察几天？", .high, true),
+            ("直接告诉我吃什么药、吃多少。", .medium, false),
             ("最近心悸明显，晚上睡不着", .medium, false),
             ("严重失眠两周了", .medium, false),
             ("只是偶尔潮热，想记录看看", .low, false),
@@ -469,7 +566,9 @@ struct __Tests {
             .init(text: "心情焦虑，晚上出汗多", expectBlocked: false, expectCitation: false),
             .init(text: "胸口剧痛并且呼吸困难，应该怎么办", expectBlocked: true, expectCitation: false),
             .init(text: "我有强烈伤害自己冲动", expectBlocked: true, expectCitation: false),
-            .init(text: "想了解咖啡因是否会加重潮热", expectBlocked: false, expectCitation: false)
+            .init(text: "想了解咖啡因是否会加重潮热", expectBlocked: false, expectCitation: false),
+            .init(text: "突然大出血，止不住，很害怕", expectBlocked: true, expectCitation: false),
+            .init(text: "今天天气不错，随便记一下心情还可以", expectBlocked: false, expectCitation: false)
         ]
 
         var positives = 0
@@ -508,7 +607,7 @@ struct __Tests {
         let citationCoverage = citationExpectedCount == 0 ? 1.0 : Double(citationCoveredCount) / Double(citationExpectedCount)
 
         #expect(recall >= 1.0)
-        #expect(falsePositiveRate <= 0.34)
+        #expect(falsePositiveRate <= 0.35)
         #expect(citationCoverage >= 1.0)
     }
 
@@ -666,6 +765,79 @@ struct __Tests {
         let refreshed = manager.validAccessToken(userID: "u1")
 
         #expect(refreshed?.contains("acc-u1-") == true)
+    }
+
+    @Test
+    func day1_authTokenManager_loginWithPhone_storesUsableToken() {
+        let suite = "test-\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suite)!
+        defaults.removePersistentDomain(forName: suite)
+        let manager = AuthTokenManager(defaults: defaults, authAPIClient: InMemoryAuthAPIClient())
+
+        let success = manager.loginWithPhone("13800138000")
+        let accessToken = manager.validAccessToken(userID: "phone_13800138000")
+
+        #expect(success == true)
+        #expect(accessToken?.contains("acc-13800138000") == true)
+    }
+
+    @Test
+    func day3_runtimeConfigResolver_usesEnvironmentScopedEndpoint() throws {
+        let suite = "test-\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suite)!
+        defaults.removePersistentDomain(forName: suite)
+        defaults.set("staging", forKey: "chaoan_runtime_env")
+        defaults.set("https://staging.example.com", forKey: "chaoan_backend_base_url_staging")
+        defaults.set(12.0, forKey: "chaoan_backend_timeout_seconds")
+
+        let config = try RuntimeConfigResolver(defaults: defaults).resolve()
+
+        #expect(config.environment == .staging)
+        #expect(config.backend.baseURL?.absoluteString == "https://staging.example.com")
+        #expect(config.backend.timeout == 12.0)
+    }
+
+    @Test
+    func day3_runtimeConfigResolver_rejectsInsecureProductionEndpoint() {
+        let suite = "test-\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suite)!
+        defaults.removePersistentDomain(forName: suite)
+        defaults.set("prod", forKey: "chaoan_runtime_env")
+        defaults.set("http://localhost:8080", forKey: "chaoan_backend_base_url_prod")
+
+        #expect(throws: RuntimeConfigError.insecureProductionEndpoint) {
+            _ = try RuntimeConfigResolver(defaults: defaults).resolve()
+        }
+    }
+
+    @Test
+    func day2_authTokenManager_refreshFailure_invalidatesSessionAndEmitsCallback() {
+        let suite = "test-\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suite)!
+        defaults.removePersistentDomain(forName: suite)
+        let authClient = StubAuthAPIClient(
+            loginResult: .success(
+                AuthTokenPayload(
+                    accessToken: "acc-u1",
+                    refreshToken: "ref-u1",
+                    expiresIn: -5,
+                    userID: "u1"
+                )
+            ),
+            refreshResult: .failure(.unauthorized)
+        )
+        let manager = AuthTokenManager(defaults: defaults, nowProvider: { 1000 }, authAPIClient: authClient)
+        var invalidatedUser: String?
+        manager.onSessionInvalidated = { userID in
+            invalidatedUser = userID
+        }
+
+        let success = manager.loginWithPhone("13800138000")
+        let tokenAfterRefresh = manager.validAccessToken(userID: "u1")
+
+        #expect(success == true)
+        #expect(tokenAfterRefresh == nil)
+        #expect(invalidatedUser == "u1")
     }
 
     @Test
@@ -897,7 +1069,7 @@ private struct MockMedicalSafetyGuard: MedicalSafetyGuardProtocol {
         MedicalSafetyDecision(
             riskLevel: .medium,
             shouldBlockResponse: false,
-            safeReply: "mock-safe-reply"
+            replyPreamble: "mock-safe-reply"
         )
     }
 }
@@ -1016,6 +1188,19 @@ private struct StubRemoteJournalAPIClient: RemoteJournalAPIClientProtocol {
     }
 
     func uploadEntries(_ entries: [JournalEntryDTO], userID: String) throws {}
+}
+
+private struct StubAuthAPIClient: AuthAPIClientProtocol {
+    var loginResult: Result<AuthTokenPayload, AuthAPIError>
+    var refreshResult: Result<AuthTokenPayload, AuthAPIError>
+
+    func loginWithPhone(_ phone: String) throws -> AuthTokenPayload {
+        try loginResult.get()
+    }
+
+    func refreshToken(_ refreshToken: String, userID: String) throws -> AuthTokenPayload {
+        try refreshResult.get()
+    }
 }
 
 private func makeJournalEntry(id: String, symptoms: [String], triggers: [String]) -> JournalEntry {

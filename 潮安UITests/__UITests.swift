@@ -32,6 +32,17 @@ final class __UITests: XCTestCase {
         XCTAssertTrue(skipButton.waitForExistence(timeout: 3))
         skipButton.tap()
 
+        let disclaimer = app.switches["welcomeDisclaimerToggle"]
+        XCTAssertTrue(disclaimer.waitForExistence(timeout: 3))
+        let switchOn: Bool = {
+            if let s = disclaimer.value as? String { return s == "1" }
+            if let b = disclaimer.value as? Bool { return b }
+            return false
+        }()
+        if !switchOn {
+            disclaimer.tap()
+        }
+
         let enterButton = app.buttons["登录后进入潮安"]
         XCTAssertTrue(enterButton.waitForExistence(timeout: 3))
         enterButton.tap()

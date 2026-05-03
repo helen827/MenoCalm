@@ -14,6 +14,14 @@ final class PracticeBreathingSession: ObservableObject {
         isPlaying.toggle()
     }
 
+    func resetSession() {
+        isPlaying = true
+        sessionRemaining = 300
+        phaseIndex = 0
+        phase = phases[0].name
+        phaseRemaining = phases[0].sec
+    }
+
     func tick() {
         guard isPlaying else { return }
         guard sessionRemaining > 0 else { return }

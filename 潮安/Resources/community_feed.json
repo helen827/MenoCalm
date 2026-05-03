@@ -1,0 +1,14 @@
+{
+  "official": [
+    { "id": "off-1", "title": "更年期睡眠管理：四个晚间习惯", "tag": "官方科普", "cardHeight": 130, "isOfficial": true },
+    { "id": "off-2", "title": "如何识别潮热触发因素", "tag": "官方科普", "cardHeight": 170, "isOfficial": true },
+    { "id": "off-3", "title": "情绪波动时的呼吸调节法", "tag": "官方科普", "cardHeight": 145, "isOfficial": true },
+    { "id": "off-4", "title": "就医沟通前该准备什么", "tag": "官方科普", "cardHeight": 160, "isOfficial": true }
+  ],
+  "user": [
+    { "id": "usr-1", "title": "我把下午咖啡换成温水后的变化", "tag": "用户分享", "cardHeight": 150, "isOfficial": false },
+    { "id": "usr-2", "title": "三周呼吸练习打卡小结", "tag": "用户分享", "cardHeight": 190, "isOfficial": false },
+    { "id": "usr-3", "title": "今天又潮热了，但我没那么慌了", "tag": "用户分享", "cardHeight": 135, "isOfficial": false },
+    { "id": "usr-4", "title": "和家人沟通的一点经验", "tag": "用户分享", "cardHeight": 165, "isOfficial": false }
+  ]
+}

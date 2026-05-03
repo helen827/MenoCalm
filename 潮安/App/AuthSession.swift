@@ -11,13 +11,22 @@ final class AuthSession: ObservableObject {
     }
 
     var isAnonymous: Bool {
-        phoneNumber == nil
+        currentUserID == "guest-local"
     }
 
     func loginWithPhone(_ phone: String) {
         let digits = phone.filter(\.isNumber)
         guard !digits.isEmpty else { return }
-        phoneNumber = digits
-        currentUserID = "phone_\(digits)"
+        login(userID: "phone_\(digits)", phoneNumber: digits)
+    }
+
+    func login(userID: String, phoneNumber: String? = nil) {
+        self.phoneNumber = phoneNumber
+        currentUserID = userID
+    }
+
+    func logout() {
+        phoneNumber = nil
+        currentUserID = "guest-local"
     }
 }

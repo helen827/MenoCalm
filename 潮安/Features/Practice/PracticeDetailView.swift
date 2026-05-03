@@ -2,7 +2,11 @@ import SwiftUI
 import Combine
 
 struct PracticeDetailView: View {
+    @EnvironmentObject var vm: AppViewModel
+    @Environment(\.scenePhase) private var scenePhase
     @StateObject private var session = PracticeBreathingSession()
+    @State private var completionRecorded = false
+    @State private var showResetConfirm = false
     private let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
     var body: some View {
@@ -50,8 +54,45 @@ struct PracticeDetailView: View {
                 }
                 .buttonStyle(PrimaryButtonStyle())
                 .frame(width: 140)
+
+                Button("重新开始本轮") {
+                    showResetConfirm = true
+                }
+                .buttonStyle(SecondaryButtonStyle())
+                .font(.system(size: 14, weight: .medium))
+
+                FrostedCard {
+                    HStack(alignment: .top, spacing: 10) {
+                        Image(systemName: "info.circle")
+                        Text("若倒计时看起来卡住，可点「重新开始本轮」。切换到其他应用时会自动暂停，回来点「继续」即可。")
+                            .font(.system(size: 12))
+                            .foregroundStyle(CATheme.subText)
+                    }
+                }
             }
             .onReceive(timer) { _ in session.tick() }
+            .onChange(of: session.sessionRemaining) { _, newValue in
+                if newValue == 0, !completionRecorded {
+                    completionRecorded = true
+                    vm.recordBreathingSessionCompleted()
+                }
+            }
+            .onChange(of: scenePhase) { _, phase in
+                if phase == .background || phase == .inactive {
+                    if session.isPlaying {
+                        session.togglePlay()
+                    }
+                }
+            }
+            .alert("重新开始练习？", isPresented: $showResetConfirm) {
+                Button("取消", role: .cancel) {}
+                Button("重新开始", role: .destructive) {
+                    session.resetSession()
+                    completionRecorded = false
+                }
+            } message: {
+                Text("将重置本轮倒计时，不会重复计入已完成次数。")
+            }
         }
     }
 }

@@ -15,6 +15,11 @@ jobs:
       - uses: actions/checkout@v4
       - name: Select Xcode
         run: sudo xcode-select -switch /Applications/Xcode.app
+      - name: Validate Runtime Config
+        run: >
+          python3 Scripts/validate_runtime_config.py
+          --env "${MENOCALM_RUNTIME_ENV:-dev}"
+          --backend-url "${MENOCALM_BACKEND_URL:-}"
       - name: Build App
         run: >
           xcodebuild
@@ -149,3 +154,28 @@ jobs:
             artifacts/medical-dataset-eval.xcresult
           if-no-files-found: ignore
           retention-days: 7
+
+  staging-gate:
+    name: Staging Full Regression
+    runs-on: macos-15
+    needs: [ui-smoke, medical-eval]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Select Xcode
+        run: sudo xcode-select -switch /Applications/Xcode.app
+      - name: Validate Staging Runtime Config
+        run: >
+          MENOCALM_RUNTIME_ENV=staging
+          MENOCALM_BACKEND_URL=https://staging-api.menocalm.example
+          python3 Scripts/validate_runtime_config.py
+          --env "$MENOCALM_RUNTIME_ENV"
+          --backend-url "$MENOCALM_BACKEND_URL"
+      - name: Run Staging Regression Pack
+        run: >
+          xcodebuild
+          -project "潮安.xcodeproj"
+          -scheme "潮安"
+          -destination 'platform=iOS Simulator,name=iPhone 17'
+          -only-testing:潮安Tests
+          -only-testing:潮安UITests/__UITests/testExample
+          test

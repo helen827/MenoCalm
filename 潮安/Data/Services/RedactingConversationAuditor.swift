@@ -14,7 +14,8 @@ final class RedactingConversationAuditor: ConversationAuditorProtocol {
             userText: redactPII(in: userText),
             assistantReply: redactPII(in: assistantReply),
             riskLevel: decision.riskLevel,
-            shouldBlockResponse: decision.shouldBlockResponse
+            shouldBlockResponse: decision.shouldBlockResponse,
+            decisionPath: decision.decisionPath
         )
         events.append(event)
     }

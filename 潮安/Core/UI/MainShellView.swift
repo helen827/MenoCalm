@@ -30,6 +30,12 @@ struct MainShellView: View {
                         MedicalListView()
                     case .settings:
                         SettingsView()
+                    case .privacyPolicy:
+                        PrivacyPolicyView()
+                    case .userAgreement:
+                        UserAgreementView()
+                    case .medicalDisclaimer:
+                        MedicalDisclaimerView()
                     case .practiceDetail:
                         PracticeDetailView()
                     case .communityPost:

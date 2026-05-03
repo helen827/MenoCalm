@@ -10,7 +10,7 @@ struct JournalEntryDTO: Codable {
 }
 
 extension JournalEntryDTO {
-    init(entry: JournalEntry) {
+    nonisolated init(entry: JournalEntry) {
         self.id = entry.id
         self.date = entry.date
         self.rawText = entry.rawText
@@ -19,7 +19,7 @@ extension JournalEntryDTO {
         self.extracted = entry.extracted
     }
 
-    var toDomain: JournalEntry {
+    nonisolated var toDomain: JournalEntry {
         JournalEntry(
             id: id,
             date: date,

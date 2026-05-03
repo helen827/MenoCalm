@@ -2,6 +2,7 @@ import SwiftUI
 
 struct PracticeView: View {
     @EnvironmentObject var router: AppRouter
+    @EnvironmentObject var vm: AppViewModel
 
     var body: some View {
         PageScaffold(title: "呼吸练习") {
@@ -20,6 +21,18 @@ struct PracticeView: View {
                 .padding(.vertical, 8)
                 .background(Capsule().fill(CATheme.lilac.opacity(0.55)))
 
+                if !vm.isNetworkReachable {
+                    FrostedCard {
+                        HStack(alignment: .top, spacing: 10) {
+                            Image(systemName: "wifi.slash")
+                                .foregroundStyle(.orange)
+                            Text("当前离线：练习可在本地正常进行；与账号、社区相关的在线能力需联网后恢复。")
+                                .font(.system(size: 12, weight: .medium))
+                                .foregroundStyle(CATheme.text)
+                        }
+                    }
+                }
+
                 FrostedCard {
                     HStack(spacing: 12) {
                         Circle()
@@ -27,11 +40,17 @@ struct PracticeView: View {
                             .frame(width: 56, height: 56)
                             .overlay(Image(systemName: "clock").font(.system(size: 24)).foregroundStyle(CATheme.primaryAlt))
                         VStack(alignment: .leading, spacing: 4) {
-                            Text("你最近记录了睡眠差")
+                            let tip = vm.breathingPracticeRecommendation()
+                            Text(tip.title)
                                 .font(.system(size: 16, weight: .semibold))
-                            Text("推荐今晚试试睡前身体扫描")
+                            Text(tip.subtitle)
                                 .font(.system(size: 13))
                                 .foregroundStyle(CATheme.subText)
+                            if vm.breathingPracticeCompletedCount() > 0 {
+                                Text("已累计完成 \(vm.breathingPracticeCompletedCount()) 次练习")
+                                    .font(.system(size: 11, weight: .medium))
+                                    .foregroundStyle(CATheme.subText.opacity(0.9))
+                            }
                         }
                     }
                 }

@@ -51,6 +51,26 @@ struct PrimaryButtonStyle: ButtonStyle {
     }
 }
 
+struct SecondaryButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(.system(size: 14, weight: .semibold))
+            .foregroundStyle(CATheme.text)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 12)
+            .background(
+                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    .fill(.white.opacity(configuration.isPressed ? 0.55 : 0.75))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    .stroke(CATheme.border, lineWidth: 1)
+            )
+            .scaleEffect(configuration.isPressed ? 0.985 : 1)
+            .animation(.easeOut(duration: 0.18), value: configuration.isPressed)
+    }
+}
+
 struct FlowTags: View {
     let tags: [String]
     @Binding var selected: Set<String>

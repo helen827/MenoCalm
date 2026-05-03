@@ -1,0 +1,14 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "RHG2TB2DDV.com.jiaying.--",
+        "paths": [
+          "/wechat/*",
+          "/app/*"
+        ]
+      }
+    ]
+  }
+}

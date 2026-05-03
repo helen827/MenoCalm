@@ -10,6 +10,16 @@ struct CommunityPostView: View {
     var body: some View {
         PageScaffold(title: "发布分享", showBack: true) {
             VStack(spacing: 12) {
+                FrostedCard {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("社区发布规范")
+                            .font(.system(size: 14, weight: .semibold))
+                        Text("分享个人体验即可，请勿发布诊断结论、用药指导或替代就医的建议。争议医疗话题请谨慎表述，平台可能对违规内容进行下架。")
+                            .font(.system(size: 12))
+                            .foregroundStyle(CATheme.subText)
+                    }
+                }
+
                 HStack(spacing: 8) {
                     RoundedRectangle(cornerRadius: 10)
                         .fill(CATheme.lilac.opacity(0.7))

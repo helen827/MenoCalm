@@ -7,6 +7,7 @@ struct ConversationAuditEvent: Equatable {
     let assistantReply: String
     let riskLevel: MedicalRiskLevel
     let shouldBlockResponse: Bool
+    let decisionPath: String
 }
 
 protocol ConversationAuditorProtocol {

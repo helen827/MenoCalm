@@ -78,6 +78,8 @@ enum StorageKeys {
     static let syncQueueFailed = "chaoan_sync_queue_failed_v1"
     static let syncQueueHistory = "chaoan_sync_queue_history_v1"
     static let authTokens = "chaoan_auth_tokens_v1"
+    static let practiceTotalSessions = "chaoan_practice_total_sessions_v1"
+    static let practiceLastCompletedAt = "chaoan_practice_last_completed_at_v1"
 
     static func scoped(_ key: String, userID: String) -> String {
         "user_\(userID)_\(key)"

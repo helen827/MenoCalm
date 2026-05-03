@@ -3,11 +3,13 @@ import SwiftUI
 struct PageScaffold<Content: View>: View {
     let title: String
     let showBack: Bool
+    let onRefresh: (() async -> Void)?
     let content: Content
 
-    init(title: String, showBack: Bool = false, @ViewBuilder content: () -> Content) {
+    init(title: String, showBack: Bool = false, onRefresh: (() async -> Void)? = nil, @ViewBuilder content: () -> Content) {
         self.title = title
         self.showBack = showBack
+        self.onRefresh = onRefresh
         self.content = content()
     }
 
@@ -34,10 +36,17 @@ struct PageScaffold<Content: View>: View {
             }
             .padding(.horizontal, 18)
 
-            ScrollView(showsIndicators: false) {
-                content
-                    .padding(.horizontal, 18)
-                    .padding(.bottom, CASpacing.lg)
+            Group {
+                let scroll = ScrollView(showsIndicators: false) {
+                    content
+                        .padding(.horizontal, 18)
+                        .padding(.bottom, CASpacing.lg)
+                }
+                if let onRefresh {
+                    scroll.refreshable { await onRefresh() }
+                } else {
+                    scroll
+                }
             }
         }
     }

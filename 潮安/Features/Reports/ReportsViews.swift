@@ -9,8 +9,19 @@ struct TrendReportView: View {
     var body: some View {
         let snapshot = vm.reportSnapshot(rangeDays: ranges[selectedRange])
 
-        PageScaffold(title: "趋势报告", showBack: true) {
+        PageScaffold(title: "趋势报告", showBack: true, onRefresh: { await vm.refreshReportDataFromStorage() }) {
             VStack(spacing: 12) {
+                if vm.isReportRefreshing {
+                    FrostedCard {
+                        HStack(spacing: 10) {
+                            ProgressView()
+                            Text("正在刷新报告数据…")
+                                .font(.system(size: 13))
+                                .foregroundStyle(CATheme.subText)
+                            Spacer(minLength: 0)
+                        }
+                    }
+                }
                 HStack(spacing: 8) {
                     ForEach(["7天", "30天", "90天"].indices, id: \.self) { idx in
                         let active = idx == selectedRange
@@ -32,11 +43,31 @@ struct TrendReportView: View {
 
                 if snapshot.sampleCount == 0 {
                     FrostedCard {
-                        Text("暂未发现历史记录。去 AI 对话页记录今天状态后，将在这里生成趋势说明。")
-                            .font(.system(size: 14))
-                            .foregroundStyle(CATheme.subText)
+                        VStack(alignment: .leading, spacing: 12) {
+                            Text("暂未发现历史记录。去 AI 对话页记录今天状态后，将在这里生成趋势说明。")
+                                .font(.system(size: 14))
+                                .foregroundStyle(CATheme.subText)
+                            Button("前往 AI 对话") {
+                                router.resetToTab(.home)
+                            }
+                            .buttonStyle(PrimaryButtonStyle())
+                            Text("也可在本页下拉，从本地重新加载记录与报告。")
+                                .font(.system(size: 11))
+                                .foregroundStyle(CATheme.subText)
+                        }
                     }
                 } else {
+                    FrostedCard {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("本期重点结论")
+                                .font(.system(size: 16, weight: .bold))
+                            Text(keyInsight(from: snapshot))
+                                .font(.system(size: 14, weight: .medium))
+                            Text("建议优先聚焦一个因素连续观察 7 天，以确认是否与症状波动相关。")
+                                .font(.system(size: 12))
+                                .foregroundStyle(CATheme.subText)
+                        }
+                    }
                     FrostedCard {
                         VStack(alignment: .leading, spacing: 8) {
                             Text("近\(ranges[selectedRange])天概况")
@@ -96,10 +127,18 @@ struct TrendReportView: View {
         }
         return "当前优先关注「\(topFactor.name)」，并持续 7 天观察它与症状波动的关系。"
     }
+
+    private func keyInsight(from snapshot: ReportSnapshot) -> String {
+        guard let symptom = snapshot.topSymptoms.first, let factor = snapshot.topFactors.first else {
+            return "当前样本不足，建议继续记录，形成稳定趋势后再评估。"
+        }
+        return "近\(snapshot.rangeDays)天「\(symptom.name)」与「\(factor.name)」出现最频繁。"
+    }
 }
 
 struct MedicalListView: View {
     @EnvironmentObject var vm: AppViewModel
+    @EnvironmentObject var router: AppRouter
     @State private var selectedRange = 1
     @State private var selectedQuestions: Set<String> = ["我的症状是否可能与围绝经期有关？", "是否需要做相关检查？"]
     @State private var customQuestion = ""
@@ -115,8 +154,19 @@ struct MedicalListView: View {
     var body: some View {
         let snapshot = vm.reportSnapshot(rangeDays: ranges[selectedRange])
 
-        PageScaffold(title: "就医沟通清单", showBack: true) {
+        PageScaffold(title: "就医沟通清单", showBack: true, onRefresh: { await vm.refreshReportDataFromStorage() }) {
             VStack(spacing: 12) {
+                if vm.isReportRefreshing {
+                    FrostedCard {
+                        HStack(spacing: 10) {
+                            ProgressView()
+                            Text("正在同步清单所需数据…")
+                                .font(.system(size: 13))
+                                .foregroundStyle(CATheme.subText)
+                            Spacer(minLength: 0)
+                        }
+                    }
+                }
                 HStack(spacing: 8) {
                     ForEach(["近7天", "近30天", "近90天"].indices, id: \.self) { i in
                         let active = i == selectedRange
@@ -137,13 +187,27 @@ struct MedicalListView: View {
                         Circle()
                             .fill(.white.opacity(0.8))
                             .frame(width: 44, height: 44)
-                            .overlay(Image(systemName: "checkmark.circle").foregroundStyle(CATheme.primaryAlt))
+                            .overlay(Image(systemName: snapshot.sampleCount > 0 ? "checkmark.circle" : "doc.text").foregroundStyle(CATheme.primaryAlt))
                         VStack(alignment: .leading, spacing: 2) {
-                            Text("数据已准备就绪")
+                            Text(snapshot.sampleCount > 0 ? "数据已准备就绪" : "暂无近期记录")
                                 .font(.system(size: 15, weight: .semibold))
                             Text("根据你近\(ranges[selectedRange])天的 \(snapshot.sampleCount) 条记录生成")
                                 .font(.system(size: 12))
                                 .foregroundStyle(CATheme.subText)
+                        }
+                    }
+                }
+
+                if snapshot.sampleCount == 0 {
+                    FrostedCard {
+                        VStack(alignment: .leading, spacing: 10) {
+                            Text("还没有可用于清单的症状记录。先在 AI 对话里记一条今天的状态，再回来刷新本页。")
+                                .font(.system(size: 13))
+                                .foregroundStyle(CATheme.subText)
+                            Button("前往 AI 对话") {
+                                router.resetToTab(.home)
+                            }
+                            .buttonStyle(PrimaryButtonStyle())
                         }
                     }
                 }
@@ -191,10 +255,12 @@ struct MedicalListView: View {
 
                 HStack(spacing: 8) {
                     Button("复制") {}
+                        .buttonStyle(SecondaryButtonStyle())
                     Button("保存") {}
+                        .buttonStyle(SecondaryButtonStyle())
                     Button("保存为图片") {}
+                        .buttonStyle(SecondaryButtonStyle())
                 }
-                .buttonStyle(PrimaryButtonStyle())
             }
         }
     }
