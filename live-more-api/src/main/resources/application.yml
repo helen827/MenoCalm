@@ -9,6 +9,7 @@ spring:
 
 server:
   port: ${SERVER_PORT:8080}
+  address: ${SERVER_ADDRESS:0.0.0.0}
 
 management:
   endpoints:
@@ -32,6 +33,9 @@ app:
     seed-on-empty: ${COMMUNITY_SEED_ON_EMPTY:false}
     seed-classpath: classpath:data/community-feed.seed.json
   auth:
+    legacy-phone-login-enabled: ${LEGACY_PHONE_LOGIN_ENABLED:false}
+    test-account-login-enabled: ${TEST_ACCOUNT_LOGIN_ENABLED:false}
+    test-account-secret: ${TEST_ACCOUNT_SECRET:}
     login-rate-limit:
       per-phone-max: ${LOGIN_RATE_LIMIT_PER_PHONE_MAX:8}
       per-ip-max: ${LOGIN_RATE_LIMIT_PER_IP_MAX:20}
@@ -54,6 +58,14 @@ app:
       app-secret: ${WECHAT_APP_SECRET:}
       universal-link: ${WECHAT_UNIVERSAL_LINK:}
       redirect-uri: ${WECHAT_REDIRECT_URI:}
+  ai:
+    provider: ${AI_PROVIDER:}
+    endpoint: ${AI_ENDPOINT:}
+    api-key: ${AI_API_KEY:}
+    model: ${AI_MODEL:}
+    model-fallbacks: ${AI_MODEL_FALLBACKS:}
+    connect-timeout-ms: ${AI_CONNECT_TIMEOUT_MS:5000}
+    read-timeout-ms: ${AI_READ_TIMEOUT_MS:15000}
   storage:
     s3-endpoint: ${S3_ENDPOINT:http://127.0.0.1:9000}
     s3-bucket: ${S3_BUCKET:replace-with-real-bucket}
@@ -67,13 +79,3 @@ app:
       url: ${MYSQL_URL:}
       user: ${MYSQL_USER:}
       password: ${MYSQL_PASSWORD:}
-
----
-spring:
-  config:
-    activate:
-      on-profile: dev
-
-app:
-  jwt:
-    secret: ${JWT_SECRET:dev-only-do-not-use-in-shared-or-production-env-min-32-chars}

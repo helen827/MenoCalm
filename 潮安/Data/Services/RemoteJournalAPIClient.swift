@@ -21,6 +21,39 @@ enum RemoteAPIError: Error, Equatable {
     case decode(String)
 }
 
+extension RemoteAPIError: LocalizedError {
+    var errorDescription: String? {
+        switch self {
+        case .injectedFailure:
+            return "远端请求被注入失败（测试模式）。"
+        case .endpointNotConfigured:
+            return "后端地址未配置，请在设置中填写 Backend Base URL。"
+        case .invalidResponse:
+            return "服务响应无效，请稍后重试。"
+        case .badRequest:
+            return "请求参数错误。"
+        case .unauthorized:
+            return "鉴权失败，请重新登录。"
+        case .forbidden:
+            return "没有访问权限。"
+        case .notFound:
+            return "请求的资源不存在。"
+        case .conflict:
+            return "数据冲突，请刷新后重试。"
+        case .rateLimited:
+            return "请求过于频繁，请稍后再试。"
+        case .timeout:
+            return "请求超时，请检查网络连接。"
+        case let .server(statusCode):
+            return "服务异常（\(statusCode)）。"
+        case let .transport(detail):
+            return "网络请求失败：\(detail)"
+        case let .decode(detail):
+            return "响应解析失败：\(detail)"
+        }
+    }
+}
+
 final class InMemoryRemoteJournalAPIClient: RemoteJournalAPIClientProtocol {
     static let shared = InMemoryRemoteJournalAPIClient()
 

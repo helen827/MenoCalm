@@ -13,6 +13,7 @@ import com.livemore.api.web.dto.PhoneCodeSendResponse;
 import com.livemore.api.web.dto.PhoneCodeVerifyRequest;
 import com.livemore.api.web.dto.PhoneLoginRequest;
 import com.livemore.api.web.dto.RefreshTokenRequest;
+import com.livemore.api.web.dto.TestAccountLoginRequest;
 import com.livemore.api.web.dto.WechatLoginRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -48,6 +49,9 @@ public class AuthService {
     }
 
     public AuthTokenResponseDto loginWithPhone(PhoneLoginRequest request, String clientIp) {
+        if (!appProperties.getAuth().isLegacyPhoneLoginEnabled()) {
+            throw new ResponseStatusException(HttpStatus.GONE, "phone_login_deprecated_use_sms_code");
+        }
         String digits = PhoneNormalizer.normalizeCnMobile(request.getPhone())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "invalid_phone"));
         loginRateLimitService.checkAndConsume(digits, clientIp);
@@ -65,6 +69,23 @@ public class AuthService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "invalid_phone"));
         loginRateLimitService.checkAndConsume(digits, clientIp);
         smsCodeService.verifyCodeOrThrow(digits, request.getCode(), clientIp);
+        return loginByPhoneDigits(digits);
+    }
+
+    public AuthTokenResponseDto loginWithTestAccount(TestAccountLoginRequest request, String providedSecret) {
+        AppProperties.Auth auth = appProperties.getAuth();
+        if (!auth.isTestAccountLoginEnabled()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "test_account_login_disabled");
+        }
+        String expectedSecret = auth.getTestAccountSecret();
+        if (expectedSecret == null || expectedSecret.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "test_account_secret_not_configured");
+        }
+        if (!expectedSecret.equals(providedSecret)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "invalid_test_account_secret");
+        }
+        String digits = PhoneNormalizer.normalizeCnMobile(request.getPhone())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "invalid_phone"));
         return loginByPhoneDigits(digits);
     }
 

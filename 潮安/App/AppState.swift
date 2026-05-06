@@ -128,6 +128,7 @@ final class AppViewModel: ObservableObject {
     @Published private(set) var isAuthLoading = false
     @Published private(set) var isReportRefreshing = false
     @Published private(set) var isNetworkReachable = true
+    @Published private(set) var aiBackendEndpointDebug = "未命中后端"
 
     private var journalRepository: JournalRepositoryProtocol
     private var conversationInsightRepository: ConversationInsightRepositoryProtocol
@@ -138,6 +139,7 @@ final class AppViewModel: ObservableObject {
     private let medicalSafetyGuard: MedicalSafetyGuardProtocol
     private let conversationAuditor: ConversationAuditorProtocol
     private let ragService: RAGServiceProtocol
+    private let remoteConversationClient: RemoteConversationAPIClientProtocol?
     private let authSession: AuthSession
     private let featureFlags: FeatureFlags
     private let rolloutMonitor: RolloutMonitor
@@ -209,6 +211,9 @@ final class AppViewModel: ObservableObject {
             userIDProvider: userIDProvider
         )
         self.remoteJournalRepository = remoteRepository
+        self.remoteConversationClient = backendBaseURL == nil
+            ? nil
+            : HTTPRemoteConversationAPIClient(env: backendEnv)
         let syncQueue = SyncQueue(userIDProvider: userIDProvider)
         self.syncQueue = syncQueue
         let rolloutMonitor = RolloutMonitor()
@@ -256,6 +261,23 @@ final class AppViewModel: ObservableObject {
 
         networkReachabilityWatch.start { [weak self] online in
             self?.isNetworkReachable = online
+        }
+        bootstrapBackendDiscovery()
+    }
+
+    private func bootstrapBackendDiscovery() {
+        DispatchQueue.global(qos: .utility).async { [weak self] in
+            guard let self else { return }
+            guard let url = BackendDiscovery.discover() else { return }
+            UserDefaults.standard.set(url.absoluteString, forKey: "chaoan_discovered_backend_base_url")
+            self.alertingCenter.record(
+                category: "backend-discovery",
+                message: "已发现后端地址：\(url.absoluteString)",
+                level: .info
+            )
+            DispatchQueue.main.async {
+                self.refreshOperationalObservability()
+            }
         }
     }
 
@@ -471,6 +493,27 @@ final class AppViewModel: ObservableObject {
         isLoggedIn = true
     }
 
+    func skipLoginForNow() {
+        authErrorMessage = nil
+        let fallbackPhone = "15121150684"
+        authSession.login(userID: "phone_\(fallbackPhone)", phoneNumber: fallbackPhone)
+        isLoggedIn = true
+        if bootstrapRemoteSessionForSkipLogin() {
+            alertingCenter.record(
+                category: "auth-skip-login",
+                message: "用户跳过登录并自动接入测试账号",
+                level: .warning
+            )
+        } else {
+            alertingCenter.record(
+                category: "auth-skip-login",
+                message: "用户跳过登录进入应用（已切换本地登录态，测试账号会话初始化失败）",
+                level: .warning
+            )
+        }
+        refreshOperationalObservability()
+    }
+
     func clearAuthError() {
         authErrorMessage = nil
     }
@@ -495,6 +538,34 @@ final class AppViewModel: ObservableObject {
         alertingCenter.record(
             category: "auth-login",
             message: "手机号登录成功：\(authSession.currentUserID)",
+            level: .info
+        )
+        seedAuthTokenIfNeeded()
+        reloadForCurrentUser()
+        isLoggedIn = true
+        refreshOperationalObservability()
+    }
+
+    func loginWithTestAccount(_ phone: String, secret: String) {
+        isAuthLoading = true
+        authErrorMessage = nil
+        defer { isAuthLoading = false }
+
+        guard let userID = tokenManager.loginWithTestAccount(phone, secret: secret) else {
+            authErrorMessage = "测试账号登录失败，请检查测试密钥或后端开关。"
+            alertingCenter.record(
+                category: "auth-test-account-login",
+                message: "测试账号登录失败，请检查 X-Test-Account-Secret 与后端配置",
+                level: .warning
+            )
+            refreshOperationalObservability()
+            return
+        }
+        authSession.login(userID: userID, phoneNumber: phone.filter(\.isNumber))
+        authErrorMessage = nil
+        alertingCenter.record(
+            category: "auth-test-account-login",
+            message: "测试账号登录成功：\(authSession.currentUserID)",
             level: .info
         )
         seedAuthTokenIfNeeded()
@@ -669,15 +740,99 @@ final class AppViewModel: ObservableObject {
         let preamble = safety.replyPreamble ?? ""
         let intent = inferIntent(from: userText)
         updateConversationMemory(with: intent)
-
-        if featureFlags.guidedConversationEnabled, shouldAskClarifyingQuestion(userText: userText, history: history, intent: intent) {
-            let body = preamble + empatheticPrefix(for: intent) + "为了给你更有用的建议，我先确认一下：\(clarifyingQuestion(for: intent))"
-            return MedicalAssistantOutputSanitizer.sanitize(body, decision: safety)
+        if authSession.isAnonymous {
+            skipLoginForNow()
         }
+        let candidateBaseURLs = resolveCandidateBackendBaseURLs()
+        guard !candidateBaseURLs.isEmpty else {
+            aiBackendEndpointDebug = "未配置后端地址"
+            let body = preamble + "远端模型地址未就绪，请检查后端服务是否启动。"
+            return annotateSource(
+                MedicalAssistantOutputSanitizer.sanitize(body, decision: safety),
+                source: "Remote Unavailable"
+            )
+        }
+        var lastError: Error?
+        var attempted: [String] = []
+        for baseURL in candidateBaseURLs {
+            attempted.append(baseURL.absoluteString)
+            do {
+                let env = BackendEnvironment(
+                    baseURL: baseURL,
+                    timeout: RuntimeConfigResolver().resolveOrFallback().backend.timeout,
+                    tokenProvider: tokenManager
+                )
+                let remoteReply = try HTTPRemoteConversationAPIClient(env: env).generateReply(
+                    userID: currentUserID,
+                    conversationID: "chat_\(currentUserID)_main",
+                    userText: userText
+                )
+                aiBackendEndpointDebug = "命中：\(baseURL.absoluteString)"
+                let body = preamble + empatheticPrefix(for: intent) + remoteReply.text
+                let sourceTag = remoteReply.source.lowercased() == "fallback" ? "Remote Degraded" : "Remote LLM"
+                return annotateSource(
+                    MedicalAssistantOutputSanitizer.sanitize(body, decision: safety),
+                    source: sourceTag
+                )
+            } catch {
+                lastError = error
+                if let remoteError = error as? RemoteAPIError {
+                    switch remoteError {
+                    case .transport, .timeout, .endpointNotConfigured, .decode:
+                        continue
+                    default:
+                        break
+                    }
+                }
+                break
+            }
+        }
+        let finalError = lastError ?? RemoteAPIError.transport("unknown")
+        alertingCenter.record(
+            category: "ai-remote-chat",
+            message: "远端AI回复失败：\(finalError.localizedDescription) endpoints=\(attempted.joined(separator: ","))",
+            level: .critical
+        )
+        if attempted.isEmpty {
+            aiBackendEndpointDebug = "失败：无可用候选地址"
+        } else {
+            aiBackendEndpointDebug = "失败：\(attempted.joined(separator: " -> "))"
+        }
+        refreshOperationalObservability()
+        let rescue = actionableFallbackReply(for: userText, intent: intent)
+        let body = preamble + empatheticPrefix(for: intent) + rescue
+        return annotateSource(
+            MedicalAssistantOutputSanitizer.sanitize(body, decision: safety),
+            source: "Remote Failed -> Local Rescue"
+        )
+    }
 
-        let rag = ragService.generateReply(userText: userText)
-        let body = preamble + empatheticPrefix(for: intent) + rag.text + formatCitationsInline(rag.citations, version: rag.knowledgeBaseVersion)
-        return MedicalAssistantOutputSanitizer.sanitize(body, decision: safety)
+    private func resolveCandidateBackendBaseURLs() -> [URL] {
+        let runtimeConfig = RuntimeConfigResolver().resolveOrFallback()
+        runtimeEnvironment = runtimeConfig.environment.rawValue
+        var candidates: [String?] = [
+            runtimeConfig.backend.baseURL?.absoluteString,
+            UserDefaults.standard.string(forKey: "chaoan_discovered_backend_base_url"),
+            UserDefaults.standard.string(forKey: "chaoan_backend_base_url_\(runtimeConfig.environment.rawValue)"),
+            UserDefaults.standard.string(forKey: "chaoan_backend_base_url")
+        ]
+#if targetEnvironment(simulator)
+        candidates.append("http://127.0.0.1:8080")
+        candidates.append("http://localhost:8080")
+#else
+        candidates.append(nil)
+#endif
+        candidates.append("http://127.0.0.1:8080")
+        candidates.append("http://localhost:8080")
+
+        let rawCandidates = candidates
+            .compactMap { $0?.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
+        var seen = Set<String>()
+        return rawCandidates.compactMap { raw in
+            guard seen.insert(raw).inserted else { return nil }
+            return URL(string: raw)
+        }
     }
 
     func updateKnowledgeBase(documents: [KnowledgeDocument], version: String) {
@@ -848,6 +1003,77 @@ final class AppViewModel: ObservableObject {
         operationalAlerts = Array(alertingCenter.alerts.suffix(8).reversed())
     }
 
+    private func resolveRemoteConversationClient() -> RemoteConversationAPIClientProtocol? {
+        if let remoteConversationClient {
+            return remoteConversationClient
+        }
+        let latestConfig = RuntimeConfigResolver().resolveOrFallback()
+        runtimeEnvironment = latestConfig.environment.rawValue
+        guard let baseURL = latestConfig.backend.baseURL else {
+            return nil
+        }
+        let env = BackendEnvironment(
+            baseURL: baseURL,
+            timeout: latestConfig.backend.timeout,
+            tokenProvider: tokenManager
+        )
+        return HTTPRemoteConversationAPIClient(env: env)
+    }
+
+    @discardableResult
+    private func bootstrapRemoteSessionForSkipLogin() -> Bool {
+        let defaultPhone = "15121150684"
+        let defaultSecret = "local-test-account-secret-2026"
+        let defaults = UserDefaults.standard
+        let configuredPhone = defaults.string(forKey: "chaoan_test_account_phone")
+        let configuredSecret = defaults.string(forKey: "chaoan_test_account_secret")
+        let phone = {
+            guard let configuredPhone else { return defaultPhone }
+            let trimmed = configuredPhone.trimmingCharacters(in: .whitespacesAndNewlines)
+            return trimmed.isEmpty ? defaultPhone : trimmed
+        }()
+        let secret = {
+            guard let configuredSecret else { return defaultSecret }
+            let trimmed = configuredSecret.trimmingCharacters(in: .whitespacesAndNewlines)
+            return trimmed.isEmpty ? defaultSecret : trimmed
+        }()
+        let timeout = RuntimeConfigResolver().resolveOrFallback().backend.timeout
+        let digits = phone.filter(\.isNumber)
+        var lastError: Error?
+        for baseURL in resolveCandidateBackendBaseURLs() {
+            let authClient = HTTPAuthAPIClient(env: AuthBackendEnvironment(baseURL: baseURL, timeout: timeout))
+            do {
+                let payload = try authClient.loginWithTestAccount(phone, secret: secret)
+                tokenManager.seedToken(
+                    userID: payload.userID,
+                    accessToken: payload.accessToken,
+                    refreshToken: payload.refreshToken,
+                    expiresIn: payload.expiresIn
+                )
+                authSession.login(userID: payload.userID, phoneNumber: digits)
+                reloadForCurrentUser()
+                isLoggedIn = true
+                authErrorMessage = nil
+                return true
+            } catch {
+                lastError = error
+                if let authError = error as? AuthAPIError {
+                    switch authError {
+                    case .transport, .timeout, .endpointNotConfigured:
+                        continue
+                    default:
+                        break
+                    }
+                }
+                break
+            }
+        }
+        if let lastError {
+            authErrorMessage = "测试账号自动接入失败：\(lastError.localizedDescription)"
+        }
+        return false
+    }
+
 #if canImport(SwiftData)
     private func migrateCurrentUserIfNeeded() {
         guard let context = localModelContext else { return }
@@ -900,13 +1126,28 @@ final class AppViewModel: ObservableObject {
 
     private func inferIntent(from text: String) -> String {
         let normalized = text.trimmingCharacters(in: .whitespacesAndNewlines)
-        if normalized.contains("怎么") || normalized.contains("如何") || normalized.contains("建议") {
+        if normalized.contains("怎么办")
+            || normalized.contains("怎么")
+            || normalized.contains("如何")
+            || normalized.contains("建议")
+            || normalized.contains("缓解")
+            || normalized.contains("改善")
+            || normalized.contains("调理") {
             return "seeking_solution"
         }
-        if normalized.contains("是不是") || normalized.contains("是否") || normalized.contains("?") || normalized.contains("？") {
+        if normalized.contains("是不是")
+            || normalized.contains("是否")
+            || normalized.contains("正常吗")
+            || normalized.contains("?")
+            || normalized.contains("？") {
             return "seeking_clarity"
         }
-        if normalized.contains("今天") || normalized.contains("昨晚") || normalized.contains("记录") || normalized.contains("症状") {
+        if normalized.contains("今天")
+            || normalized.contains("昨晚")
+            || normalized.contains("记录")
+            || normalized.contains("症状")
+            || normalized.contains("这几天")
+            || normalized.contains("最近") {
             return "daily_journal"
         }
         return "general_support"
@@ -916,8 +1157,17 @@ final class AppViewModel: ObservableObject {
         let cleaned = userText.trimmingCharacters(in: .whitespacesAndNewlines)
         let hasQuestionMark = cleaned.contains("?") || cleaned.contains("？")
         let isFirstRound = history.count <= 2
-        let isShortInput = cleaned.count <= 20
-        return (intent == "seeking_solution" || intent == "general_support") && isFirstRound && isShortInput && !hasQuestionMark
+        let isVeryShortInput = cleaned.count <= 8
+        let noTopic = !containsCommonTopicKeyword(cleaned)
+        return intent == "general_support" && isFirstRound && isVeryShortInput && !hasQuestionMark && noTopic
+    }
+
+    private func containsCommonTopicKeyword(_ text: String) -> Bool {
+        let topics = [
+            "潮热", "出汗", "盗汗", "睡", "失眠", "醒", "情绪", "焦虑", "烦躁", "心悸",
+            "月经", "经期", "头痛", "关节", "疲劳", "体重", "饮食", "运动", "血压"
+        ]
+        return topics.contains { text.contains($0) }
     }
 
     private func clarifyingQuestion(for intent: String) -> String {
@@ -944,10 +1194,76 @@ final class AppViewModel: ObservableObject {
         }
     }
 
-    private func formatCitationsInline(_ citations: [RAGCitation], version: String) -> String {
-        guard !citations.isEmpty else { return "\n\n知识库版本：\(version)" }
-        let titles = citations.map(\.title).joined(separator: "；")
-        return "\n\n参考来源：\(titles)\n知识库版本：\(version)"
+    private func isGenericRAGReply(_ text: String) -> Bool {
+        let normalized = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        return normalized.hasPrefix("已记录你的情况")
+            || normalized.hasPrefix("知识库暂不可用")
+    }
+
+    private func actionableFallbackReply(for userText: String, intent: String) -> String {
+        if userText.contains("潮热") || userText.contains("出汗") || userText.contains("盗汗") {
+            return """
+            这很常见，不一定代表突然“变严重”。很多人会在季节变暖、昼夜温差变化或睡眠波动时，再次明显感觉到潮热。
+
+            你可以先按这个顺序做：
+            1. 先降温：发作时用风扇、冷敷颈后、换透气衣物，通常几分钟内会缓下来。
+            2. 找诱因：连续7天记录“发作时间-强度-当时在做什么（咖啡/辛辣/情绪/室温）”。
+            3. 调环境：卧室降温、分层穿衣，晚间减少酒精和咖啡因。
+
+            如果一周出现多次且明显影响睡眠或工作，建议尽快到妇科或更年期门诊评估，必要时可以讨论更系统的治疗方案。
+            """
+        }
+        if userText.contains("睡") || userText.contains("失眠") || userText.contains("夜醒") {
+            return """
+            先别急，我们先把今晚的成功率提上来。睡眠问题在围绝经期很常见，关键是“先稳定节律，再减轻夜间唤醒”。
+
+            今晚就能执行的三步：
+            1. 固定节律：尽量固定上床和起床时间，别反复补觉。
+            2. 睡前减刺激：睡前90分钟减少刷屏、咖啡因和酒精摄入。
+            3. 身体降档：做10分钟慢呼吸或放松练习，目标是让心率先降下来。
+
+            如果持续2-4周仍明显睡不好，建议去睡眠门诊或妇科评估，通常能找到更精准的干预方式。
+            """
+        }
+        if userText.contains("情绪") || userText.contains("焦虑") || userText.contains("烦躁") || userText.contains("心慌") {
+            return """
+            你现在这种烦躁/焦虑感受非常真实，也很常见。先不用逼自己“马上好起来”，先把身体从高唤醒状态拉下来。
+
+            先做这三步：
+            1. 立即稳住：做3轮慢呼吸（吸4秒、呼6秒），让心率先降下来。
+            2. 快速外化：写下“触发事件-当下想法-身体反应”，减少反复内耗。
+            3. 基础照护：优先保证睡眠、规律进食和轻量活动，这对情绪稳定很关键。
+
+            如果情绪持续明显低落、频繁失控或已影响工作生活，建议尽快寻求专业帮助，你不需要一个人扛着。
+            """
+        }
+        if intent == "seeking_clarity" {
+            return """
+            你的问题很关键。根据你现在提供的信息，更像是围绝经期常见波动，但还需要结合月经变化、持续时间和对生活的影响程度来判断。
+
+            你可以再补充三点，我会给你更具体的判断：
+            1. 近3个月月经周期有没有提前/延后或量变化；
+            2. 潮热或睡眠问题每周大概出现几次；
+            3. 是否已经影响到白天工作、情绪或体力。
+            """
+        }
+        return """
+        我先给你一个不空泛、能执行的通用方案：
+        1. 先记录：连续7天记录症状时间、强度和触发因素。
+        2. 先调整：优先调整睡眠节律、饮食刺激和压力管理。
+        3. 看变化：若仍持续加重或明显影响生活，尽快到妇科/内分泌门诊评估。
+
+        你也可以告诉我“当前最困扰的一件事”（比如潮热、睡眠或情绪），我会给你一版更细的分步方案。
+        """
+    }
+
+    private func annotateSource(_ text: String, source: String) -> String {
+#if DEBUG
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmed + "\n\n（来源：\(source)）"
+#else
+        return text
+#endif
     }
 
     private func updateConversationMemory(with intent: String) {

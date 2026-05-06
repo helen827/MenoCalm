@@ -12,6 +12,7 @@ struct WelcomeView: View {
     @State private var showWechatAuthSheet = false
     @State private var wechatCodeInput = ""
     @State private var wechatAuthError: String?
+    @State private var testAccountSecret = "local-test-account-secret-2026"
 
     var body: some View {
         VStack(spacing: 18) {
@@ -73,6 +74,14 @@ struct WelcomeView: View {
                         startPhoneAuth(.login)
                     }
                     .buttonStyle(PrimaryButtonStyle())
+                    .opacity(acceptedDisclaimers ? 1 : 0.45)
+                    .disabled(!acceptedDisclaimers || vm.isAuthLoading)
+                    Button("先进入（跳过登录）") {
+                        vm.skipLoginForNow()
+                    }
+                    .buttonStyle(.plain)
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(CATheme.primaryAlt)
                     .opacity(acceptedDisclaimers ? 1 : 0.45)
                     .disabled(!acceptedDisclaimers || vm.isAuthLoading)
                     if vm.isAuthLoading {
@@ -150,6 +159,16 @@ struct WelcomeView: View {
                     }
                     .buttonStyle(PrimaryButtonStyle())
                     .disabled(vm.isAuthLoading || !phoneCodeSent)
+
+                    if phoneAuthMode == .login {
+                        Button("测试账号快速登录（跳过验证码）") {
+                            submitTestAccountLogin()
+                        }
+                        .buttonStyle(.plain)
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundStyle(CATheme.primaryAlt)
+                        .disabled(vm.isAuthLoading)
+                    }
 
                     if vm.isAuthLoading {
                         HStack(spacing: 8) {
@@ -293,6 +312,22 @@ struct WelcomeView: View {
         }
         vm.clearAuthError()
         vm.loginWithPhoneCode(digits, code: code)
+        if let authError = vm.authErrorMessage, !authError.isEmpty {
+            phoneAuthError = authError
+            return
+        }
+        phoneAuthError = nil
+        showPhoneAuthSheet = false
+    }
+
+    private func submitTestAccountLogin() {
+        let digits = phoneInput.filter(\.isNumber)
+        guard digits.count == 11, digits.hasPrefix("1") else {
+            phoneAuthError = "请输入正确的11位大陆手机号。"
+            return
+        }
+        vm.clearAuthError()
+        vm.loginWithTestAccount(digits, secret: testAccountSecret)
         if let authError = vm.authErrorMessage, !authError.isEmpty {
             phoneAuthError = authError
             return

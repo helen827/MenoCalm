@@ -6,8 +6,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.List;
 
 @Component
 public class MySqlCommunityMediaStore implements CommunityMediaStore {
@@ -49,6 +51,37 @@ public class MySqlCommunityMediaStore implements CommunityMediaStore {
             ps.executeUpdate();
         } catch (SQLException ex) {
             throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "mysql_write_failed");
+        }
+    }
+
+    @Override
+    public int countOwnedMedia(String ownerUserId, List<String> mediaIds) {
+        if (mediaIds == null || mediaIds.isEmpty()) {
+            return 0;
+        }
+        StringBuilder inClause = new StringBuilder();
+        for (int i = 0; i < mediaIds.size(); i++) {
+            if (i > 0) {
+                inClause.append(",");
+            }
+            inClause.append("?");
+        }
+        String sql = "SELECT COUNT(*) AS c FROM community_media WHERE owner_user_id = ? AND id IN (" + inClause + ")";
+        try (var conn = connectionProvider.openConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, ownerUserId);
+            int idx = 2;
+            for (String mediaId : mediaIds) {
+                ps.setString(idx++, mediaId);
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                if (!rs.next()) {
+                    return 0;
+                }
+                return rs.getInt("c");
+            }
+        } catch (SQLException ex) {
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "mysql_read_failed");
         }
     }
 }

@@ -4,6 +4,7 @@ protocol AuthAPIClientProtocol {
     func sendPhoneCode(_ phone: String) throws
     func verifyPhoneCode(_ phone: String, code: String) throws -> AuthTokenPayload
     func loginWithPhone(_ phone: String) throws -> AuthTokenPayload
+    func loginWithTestAccount(_ phone: String, secret: String) throws -> AuthTokenPayload
     func loginWithWeChatCode(_ code: String) throws -> AuthTokenPayload
     func refreshToken(_ refreshToken: String, userID: String) throws -> AuthTokenPayload
 }
@@ -56,6 +57,13 @@ final class InMemoryAuthAPIClient: AuthAPIClientProtocol {
         )
     }
 
+    func loginWithTestAccount(_ phone: String, secret: String) throws -> AuthTokenPayload {
+        guard !secret.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            throw AuthAPIError.unauthorized
+        }
+        return try loginWithPhone(phone)
+    }
+
     func refreshToken(_ refreshToken: String, userID: String) throws -> AuthTokenPayload {
         guard !refreshToken.isEmpty else { throw AuthAPIError.unauthorized }
         return AuthTokenPayload(
@@ -77,6 +85,7 @@ final class InMemoryAuthAPIClient: AuthAPIClientProtocol {
             userID: uid
         )
     }
+
 }
 
 struct AuthBackendEnvironment {
@@ -130,6 +139,23 @@ struct HTTPAuthAPIClient: AuthAPIClientProtocol {
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.httpBody = try JSONEncoder().encode(["phone": phone.filter(\.isNumber), "code": code])
+        let data = try send(request)
+        do {
+            return try JSONDecoder().decode(AuthTokenPayload.self, from: data)
+        } catch {
+            throw AuthAPIError.decode("decode failed: \(error.localizedDescription)")
+        }
+    }
+
+    func loginWithTestAccount(_ phone: String, secret: String) throws -> AuthTokenPayload {
+        guard let endpoint = endpoint(path: "/api/v1/auth/test-account/login") else {
+            throw AuthAPIError.endpointNotConfigured
+        }
+        var request = URLRequest(url: endpoint, timeoutInterval: env.timeout)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue(secret, forHTTPHeaderField: "X-Test-Account-Secret")
+        request.httpBody = try JSONEncoder().encode(["phone": phone.filter(\.isNumber)])
         let data = try send(request)
         do {
             return try JSONDecoder().decode(AuthTokenPayload.self, from: data)

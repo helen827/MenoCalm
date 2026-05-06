@@ -8,6 +8,7 @@ import com.livemore.api.support.TokenHasher;
 import com.livemore.api.web.dto.PhoneCodeVerifyRequest;
 import com.livemore.api.web.dto.PhoneLoginRequest;
 import com.livemore.api.web.dto.RefreshTokenRequest;
+import com.livemore.api.web.dto.TestAccountLoginRequest;
 import com.livemore.api.web.dto.WechatLoginRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -55,6 +56,7 @@ class AuthServiceTest {
         appProperties.getJwt().setSecret("dev-only-do-not-use-in-shared-or-production-env-min-32-chars");
         appProperties.getJwt().setAccessTokenSeconds(1800);
         appProperties.getRefreshToken().setTtlSeconds(2592000);
+        appProperties.getAuth().setLegacyPhoneLoginEnabled(true);
         authService = new AuthService(
                 authStore,
                 jwtService,
@@ -172,6 +174,40 @@ class AuthServiceTest {
     }
 
     @Test
+    void loginWithWechat_withoutUnionId_fallsBackToOpenId() {
+        WechatLoginRequest request = new WechatLoginRequest();
+        request.setCode("wx-code");
+        WechatOAuthProfile profile = new WechatOAuthProfile();
+        profile.setOpenId("openid-only");
+        profile.setNickname("wx-user");
+        when(wechatOAuthClient.exchangeCode("wx-code")).thenReturn(profile);
+        when(authStore.findUserByIdentity("wechat", "openid-only")).thenReturn(Optional.empty());
+        when(jwtService.createAccessToken(any())).thenReturn("access-token");
+
+        var response = authService.loginWithWechat(request);
+
+        verify(authStore).findUserByIdentity("wechat", "openid-only");
+        verify(authStore).upsertUserIdentity(
+                eq(response.getUserId()),
+                eq("wechat"),
+                eq("openid-only"),
+                eq("openid-only"),
+                eq("wx-user")
+        );
+    }
+
+    @Test
+    void loginWithWechat_whenUpstreamUnavailable_propagates503() {
+        WechatLoginRequest request = new WechatLoginRequest();
+        request.setCode("wx-code");
+        when(wechatOAuthClient.exchangeCode("wx-code"))
+                .thenThrow(new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "wechat_upstream_failed"));
+
+        ResponseStatusException ex = assertThrows(ResponseStatusException.class, () -> authService.loginWithWechat(request));
+        assertEquals(HttpStatus.SERVICE_UNAVAILABLE, ex.getStatusCode());
+    }
+
+    @Test
     void loginWithPhoneCode_verifiesOtpAndIssuesTokens() {
         PhoneCodeVerifyRequest request = new PhoneCodeVerifyRequest();
         request.setPhone("13800138000");
@@ -184,5 +220,72 @@ class AuthServiceTest {
         assertEquals("phone_13800138000", response.getUserId());
         verify(smsCodeService).verifyCodeOrThrow("13800138000", "123456", "127.0.0.1");
         verify(authStore).revokeAllRefreshTokens("phone_13800138000");
+    }
+
+    @Test
+    void loginWithPhone_whenLegacyDisabled_returnsGone() {
+        AppProperties appProperties = new AppProperties();
+        appProperties.getJwt().setSecret("dev-only-do-not-use-in-shared-or-production-env-min-32-chars");
+        appProperties.getAuth().setLegacyPhoneLoginEnabled(false);
+        AuthService disabled = new AuthService(
+                authStore,
+                jwtService,
+                appProperties,
+                loginRateLimitService,
+                wechatOAuthClient,
+                smsCodeService
+        );
+        PhoneLoginRequest request = new PhoneLoginRequest();
+        request.setPhone("13800138000");
+
+        ResponseStatusException ex = assertThrows(ResponseStatusException.class, () -> disabled.loginWithPhone(request, "127.0.0.1"));
+        assertEquals(HttpStatus.GONE, ex.getStatusCode());
+    }
+
+    @Test
+    void loginWithTestAccount_whenEnabledAndSecretValid_returnsTokens() {
+        AppProperties appProperties = new AppProperties();
+        appProperties.getJwt().setSecret("dev-only-do-not-use-in-shared-or-production-env-min-32-chars");
+        appProperties.getRefreshToken().setTtlSeconds(2592000);
+        appProperties.getAuth().setTestAccountLoginEnabled(true);
+        appProperties.getAuth().setTestAccountSecret("s3cr3t");
+        AuthService service = new AuthService(
+                authStore,
+                jwtService,
+                appProperties,
+                loginRateLimitService,
+                wechatOAuthClient,
+                smsCodeService
+        );
+        when(authStore.findUserById("phone_13800138000")).thenReturn(Optional.empty());
+        when(jwtService.createAccessToken("phone_13800138000")).thenReturn("access-token");
+        TestAccountLoginRequest request = new TestAccountLoginRequest();
+        request.setPhone("13800138000");
+
+        var response = service.loginWithTestAccount(request, "s3cr3t");
+
+        assertEquals("phone_13800138000", response.getUserId());
+        assertEquals("access-token", response.getAccessToken());
+    }
+
+    @Test
+    void loginWithTestAccount_whenSecretInvalid_returns401() {
+        AppProperties appProperties = new AppProperties();
+        appProperties.getJwt().setSecret("dev-only-do-not-use-in-shared-or-production-env-min-32-chars");
+        appProperties.getAuth().setTestAccountLoginEnabled(true);
+        appProperties.getAuth().setTestAccountSecret("s3cr3t");
+        AuthService service = new AuthService(
+                authStore,
+                jwtService,
+                appProperties,
+                loginRateLimitService,
+                wechatOAuthClient,
+                smsCodeService
+        );
+        TestAccountLoginRequest request = new TestAccountLoginRequest();
+        request.setPhone("13800138000");
+
+        ResponseStatusException ex = assertThrows(ResponseStatusException.class, () -> service.loginWithTestAccount(request, "bad"));
+        assertEquals(HttpStatus.UNAUTHORIZED, ex.getStatusCode());
     }
 }

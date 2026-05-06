@@ -14,6 +14,7 @@ public class AppProperties {
     private final Community community = new Community();
     private final Security security = new Security();
     private final Auth auth = new Auth();
+    private final Ai ai = new Ai();
     private final Storage storage = new Storage();
     private final Persistence persistence = new Persistence();
 
@@ -35,6 +36,10 @@ public class AppProperties {
 
     public Auth getAuth() {
         return auth;
+    }
+
+    public Ai getAi() {
+        return ai;
     }
 
     public Storage getStorage() {
@@ -119,6 +124,9 @@ public class AppProperties {
         private final LoginRateLimit loginRateLimit = new LoginRateLimit();
         private final Wechat wechat = new Wechat();
         private final Sms sms = new Sms();
+        private boolean legacyPhoneLoginEnabled = false;
+        private boolean testAccountLoginEnabled = false;
+        private String testAccountSecret = "";
 
         public LoginRateLimit getLoginRateLimit() {
             return loginRateLimit;
@@ -130,6 +138,30 @@ public class AppProperties {
 
         public Sms getSms() {
             return sms;
+        }
+
+        public boolean isLegacyPhoneLoginEnabled() {
+            return legacyPhoneLoginEnabled;
+        }
+
+        public void setLegacyPhoneLoginEnabled(boolean legacyPhoneLoginEnabled) {
+            this.legacyPhoneLoginEnabled = legacyPhoneLoginEnabled;
+        }
+
+        public boolean isTestAccountLoginEnabled() {
+            return testAccountLoginEnabled;
+        }
+
+        public void setTestAccountLoginEnabled(boolean testAccountLoginEnabled) {
+            this.testAccountLoginEnabled = testAccountLoginEnabled;
+        }
+
+        public String getTestAccountSecret() {
+            return testAccountSecret;
+        }
+
+        public void setTestAccountSecret(String testAccountSecret) {
+            this.testAccountSecret = testAccountSecret;
         }
     }
 
@@ -264,6 +296,74 @@ public class AppProperties {
 
         public Verification getVerification() {
             return verification;
+        }
+    }
+
+    public static class Ai {
+        private String provider = "";
+        private String endpoint = "";
+        private String apiKey = "";
+        private String model = "";
+        private String modelFallbacks = "";
+        @Min(1000)
+        private long connectTimeoutMs = 5000;
+        @Min(1000)
+        private long readTimeoutMs = 15000;
+
+        public String getProvider() {
+            return provider;
+        }
+
+        public void setProvider(String provider) {
+            this.provider = provider;
+        }
+
+        public String getEndpoint() {
+            return endpoint;
+        }
+
+        public void setEndpoint(String endpoint) {
+            this.endpoint = endpoint;
+        }
+
+        public String getApiKey() {
+            return apiKey;
+        }
+
+        public void setApiKey(String apiKey) {
+            this.apiKey = apiKey;
+        }
+
+        public String getModel() {
+            return model;
+        }
+
+        public void setModel(String model) {
+            this.model = model;
+        }
+
+        public String getModelFallbacks() {
+            return modelFallbacks;
+        }
+
+        public void setModelFallbacks(String modelFallbacks) {
+            this.modelFallbacks = modelFallbacks;
+        }
+
+        public long getConnectTimeoutMs() {
+            return connectTimeoutMs;
+        }
+
+        public void setConnectTimeoutMs(long connectTimeoutMs) {
+            this.connectTimeoutMs = connectTimeoutMs;
+        }
+
+        public long getReadTimeoutMs() {
+            return readTimeoutMs;
+        }
+
+        public void setReadTimeoutMs(long readTimeoutMs) {
+            this.readTimeoutMs = readTimeoutMs;
         }
     }
 

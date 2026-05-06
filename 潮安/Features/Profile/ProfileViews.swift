@@ -89,6 +89,8 @@ struct SettingsView: View {
     @State private var bedtimeOn = false
     @State private var weeklyOn = true
     @State private var guidedModeOn = true
+    @State private var backendURLInput = ""
+    @State private var runtimeEnvInput = AppRuntimeEnvironment.dev
     @State private var actionResultMessage: String?
     @State private var showDeleteConfirm = false
     @State private var showDeactivateConfirm = false
@@ -179,6 +181,45 @@ struct SettingsView: View {
                                     .foregroundStyle(.red)
                             }
                         }
+                    }
+                }
+                FrostedCard {
+                    VStack(alignment: .leading, spacing: 10) {
+                        Text("后端联调（内部）")
+                            .font(.system(size: 15, weight: .bold))
+                        Text("AI 对话链路保存后立即生效；真机联调不要用 localhost，改成电脑局域网 IP。")
+                            .font(.system(size: 12))
+                            .foregroundStyle(CATheme.subText)
+
+                        HStack(spacing: 10) {
+                            Text("环境")
+                                .font(.system(size: 13, weight: .semibold))
+                            Picker("环境", selection: $runtimeEnvInput) {
+                                Text("dev").tag(AppRuntimeEnvironment.dev)
+                                Text("staging").tag(AppRuntimeEnvironment.staging)
+                                Text("prod").tag(AppRuntimeEnvironment.prod)
+                            }
+                            .pickerStyle(.segmented)
+                        }
+
+                        TextField("Backend Base URL（例如 http://192.168.1.10:8080）", text: $backendURLInput)
+                            .textInputAutocapitalization(.never)
+                            .autocorrectionDisabled()
+                            .font(.system(size: 12, weight: .medium))
+                            .padding(.horizontal, 12)
+                            .frame(height: 40)
+                            .background(RoundedRectangle(cornerRadius: 12).fill(Color.white.opacity(0.9)))
+                            .overlay(RoundedRectangle(cornerRadius: 12).stroke(CATheme.border, lineWidth: 1))
+
+                        Button("保存后端地址") {
+                            let defaults = UserDefaults.standard
+                            defaults.set(runtimeEnvInput.rawValue, forKey: "chaoan_runtime_env")
+                            defaults.set(backendURLInput, forKey: "chaoan_backend_base_url_\(runtimeEnvInput.rawValue)")
+                            actionResultMessage = "已保存：\(runtimeEnvInput.rawValue) -> \(backendURLInput)\nAI 对话链路会立即使用新地址。"
+                        }
+                        .buttonStyle(.plain)
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundStyle(CATheme.primaryAlt)
                     }
                 }
                 FrostedCard {
@@ -275,6 +316,12 @@ struct SettingsView: View {
         }
         .onAppear {
             guidedModeOn = vm.isGuidedConversationEnabled
+            let defaults = UserDefaults.standard
+            let envRaw = defaults.string(forKey: "chaoan_runtime_env") ?? AppRuntimeEnvironment.dev.rawValue
+            runtimeEnvInput = AppRuntimeEnvironment(rawValue: envRaw) ?? .dev
+            backendURLInput = defaults.string(forKey: "chaoan_backend_base_url_\(runtimeEnvInput.rawValue)")
+                ?? defaults.string(forKey: "chaoan_backend_base_url")
+                ?? ""
         }
         .onChange(of: guidedModeOn) { _, value in
             vm.setGuidedConversationEnabled(value)

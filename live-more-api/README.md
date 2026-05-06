@@ -10,11 +10,33 @@ Spring Boot 3 后端，已收口为 **MySQL + Redis + S3 兼容对象存储** �
 | POST | `/api/v1/auth/phone/code/verify` | 无 |
 | POST | `/api/v1/auth/phone/login` | 无 |
 | POST | `/api/v1/auth/wechat/login` | 无 |
+| POST | `/api/v1/auth/test-account/login` | 无（需 `X-Test-Account-Secret`） |
 | POST | `/api/v1/auth/refresh` | 无 |
 | GET | `/api/v1/journal/entries?userId=` | Bearer JWT |
 | PUT | `/api/v1/journal/entries?userId=` | Bearer JWT |
 | GET | `/community/feed` | 无 |
 | POST | `/api/v1/community/media/presign` | Bearer JWT |
+| POST | `/api/v1/community/posts?userId=` | Bearer JWT |
+| GET | `/api/v1/community/posts?userId=&limit=` | Bearer JWT |
+| GET | `/api/v1/community/posts/page?userId=&cursor=&limit=` | Bearer JWT |
+| GET | `/api/v1/community/posts/{postId}?userId=` | Bearer JWT |
+| POST | `/api/v1/community/posts/{postId}/comments?userId=` | Bearer JWT |
+| GET | `/api/v1/community/posts/{postId}/comments?userId=&limit=` | Bearer JWT |
+| POST | `/api/v1/community/posts/{postId}/like?userId=` | Bearer JWT |
+| DELETE | `/api/v1/community/posts/{postId}/like?userId=` | Bearer JWT |
+| POST | `/api/v1/community/posts/{postId}/favorite?userId=` | Bearer JWT |
+| DELETE | `/api/v1/community/posts/{postId}/favorite?userId=` | Bearer JWT |
+| DELETE | `/api/v1/community/posts/{postId}?userId=` | Bearer JWT |
+| DELETE | `/api/v1/community/posts/{postId}/comments/{commentId}?userId=` | Bearer JWT |
+| GET | `/api/v1/conversations/messages?userId=&conversationId=&limit=` | Bearer JWT |
+| POST | `/api/v1/conversations/messages?userId=` | Bearer JWT |
+| GET | `/api/v1/conversations/insight?userId=&conversationId=` | Bearer JWT |
+| PUT | `/api/v1/conversations/insight?userId=&conversationId=` | Bearer JWT |
+| POST | `/api/v1/conversations/insight/{conversationId}/analyze?userId=` | Bearer JWT |
+| GET | `/api/v1/knowledge/docs?limit=` | 无 |
+| GET | `/api/v1/knowledge/docs/{id}` | 无 |
+| POST | `/api/v1/knowledge/docs` | Bearer JWT |
+| DELETE | `/api/v1/knowledge/docs/{id}` | Bearer JWT |
 
 ## 本地运行
 
@@ -47,6 +69,9 @@ mysql -h127.0.0.1 -uroot -proot live_more < docs/mysql-journal-schema.sql
 | `JWT_SECRET` | HS256 密钥，至少 32 字符 |
 | `JWT_ACCESS_SECONDS` | Access token TTL（秒） |
 | `REFRESH_TOKEN_TTL_SECONDS` | Refresh token TTL（秒） |
+| `LEGACY_PHONE_LOGIN_ENABLED` | 是否启用旧手机号直登接口（默认 `false`） |
+| `TEST_ACCOUNT_LOGIN_ENABLED` | 是否启用测试账号登录接口（默认 `false`） |
+| `TEST_ACCOUNT_SECRET` | 测试账号登录密钥（仅在启用测试登录时生效） |
 | `SMS_PROVIDER` | 短信通道提供方（当前支持 `aliyun`） |
 | `SMS_SIGN_NAME` | 阿里云短信签名 |
 | `SMS_TEMPLATE_CODE` | 阿里云短信模板编码（模板变量需含 `code`） |
@@ -62,6 +87,12 @@ mysql -h127.0.0.1 -uroot -proot live_more < docs/mysql-journal-schema.sql
 | `WECHAT_APP_SECRET` | 微信开放平台 AppSecret |
 | `WECHAT_UNIVERSAL_LINK` | iOS 微信回调 Universal Link |
 | `WECHAT_REDIRECT_URI` | iOS 微信回调 URI |
+| `AI_PROVIDER` | AI 提供方（当前支持 `qiniu`） |
+| `AI_ENDPOINT` | 七牛云大模型 OpenAI 兼容接口地址 |
+| `AI_API_KEY` | 七牛云大模型 API Key |
+| `AI_MODEL` | 七牛云模型名称 |
+| `AI_CONNECT_TIMEOUT_MS` | AI 连接超时（毫秒） |
+| `AI_READ_TIMEOUT_MS` | AI 响应超时（毫秒） |
 | `COMMUNITY_SEED_ON_EMPTY` | 空库时是否导入 `community-feed.seed.json` |
 | `S3_ENDPOINT` | S3 兼容端点 |
 | `S3_BUCKET` | 对象存储桶 |
@@ -79,6 +110,9 @@ mvn test
 
 ## 联调最小验证
 
+安全要求：所有受保护接口必须使用正式登录流程签发的 JWT（`/api/v1/auth/phone/code/verify` 或 `/api/v1/auth/wechat/login`）；不支持手工伪造 token 联调。
+补充：在短信/微信未就绪阶段，可临时启用 `POST /api/v1/auth/test-account/login` 获取正式 JWT，但必须配置 `TEST_ACCOUNT_LOGIN_ENABLED=true` 且设置 `TEST_ACCOUNT_SECRET`，上线前应关闭该开关。
+
 1. `POST /api/v1/auth/phone/code/send` 发送短信验证码
 2. `POST /api/v1/auth/phone/code/verify` 用验证码换取 `accessToken/refreshToken`
 3. `POST /api/v1/auth/wechat/login` 使用微信 `code` 注册/登录
@@ -86,5 +120,16 @@ mvn test
 5. `PUT /api/v1/journal/entries` 写入后再 `GET` 读回
 6. `GET /community/feed` 获取社区列表
 7. `POST /api/v1/community/media/presign` 获取上传预签名
+8. `POST /api/v1/community/posts?userId=...` 发帖（支持 `tags`、`mediaIds`，会校验媒体归属）
+9. `POST /api/v1/community/posts/{postId}/comments?userId=...` 发表评论
+10. `POST /api/v1/community/posts/{postId}/like?userId=...` 点赞，`DELETE` 同路径取消点赞
+11. `POST /api/v1/community/posts/{postId}/favorite?userId=...` 收藏，`DELETE` 同路径取消收藏
+12. `DELETE /api/v1/community/posts/{postId}?userId=...` 删除自己的帖子（软删除）
+13. `DELETE /api/v1/community/posts/{postId}/comments/{commentId}?userId=...` 删除自己的评论（软删除）
+14. `GET /api/v1/community/posts/page?userId=...&limit=20` 首次分页，后续带上返回的 `nextCursor`
+15. `POST /api/v1/conversations/messages?userId=...` 写入对话消息
+16. `POST /api/v1/conversations/insight/{conversationId}/analyze?userId=...` 触发分析并落库（配置 `AI_PROVIDER=qiniu` 后调用七牛云）
 
 微信开放平台参数准备见：`docs/wechat-open-platform-checklist.md`。
+
+说明：`/api/v1/auth/phone/login` 为兼容历史客户端的旧接口，默认关闭；开启需设置 `LEGACY_PHONE_LOGIN_ENABLED=true`。

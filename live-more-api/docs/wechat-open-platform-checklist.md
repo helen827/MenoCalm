@@ -20,7 +20,7 @@
 - `Bundle ID`（主 App）：`com.jiaying.--`
 - `Tests`：`com.jiaying.--Tests`（不用于微信申请）
 - `UITests`：`com.jiaying.--UITests`（不用于微信申请）
-- `Universal Link`：当前工程已开启占位 `applinks:app.yourdomain.com`，需替换为正式域名。
+- `Universal Link`：当前工程已配置 `applinks:proudmenopause.com`。
 
 参考文档：
 - `/Users/jiayinghe/Desktop/潮安/docs/WeChat-Universal-Link-Setup.md`

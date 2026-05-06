@@ -101,6 +101,16 @@ final class AuthTokenManager: AuthTokenProviderProtocol {
         }
     }
 
+    func loginWithTestAccount(_ phone: String, secret: String) -> String? {
+        do {
+            let payload = try authAPIClient.loginWithTestAccount(phone, secret: secret)
+            saveAuthPayload(payload)
+            return payload.userID
+        } catch {
+            return nil
+        }
+    }
+
     func loginWithWeChatCode(_ code: String) -> String? {
         do {
             let payload = try authAPIClient.loginWithWeChatCode(code)

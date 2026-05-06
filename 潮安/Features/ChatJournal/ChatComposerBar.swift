@@ -13,8 +13,16 @@ struct ChatComposerBar: View {
             iconCircle(systemName: "plus", action: onAttach)
 
             HStack(spacing: 8) {
-                TextField("可以和我说任何事...", text: $text)
-                    .font(.system(size: 16, weight: .medium))
+                ZStack(alignment: .leading) {
+                    if text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                        Text("可以和我说任何事...")
+                            .font(.system(size: 16, weight: .medium))
+                            .foregroundStyle(CATheme.subText.opacity(0.7))
+                            .padding(.leading, 4)
+                    }
+                    MultilingualTextView(text: $text)
+                        .frame(minHeight: 24, maxHeight: 72)
+                }
                 Spacer(minLength: 0)
                 Button(action: onVoice) {
                     Image(systemName: "mic.fill")

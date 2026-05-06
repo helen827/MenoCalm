@@ -6,10 +6,10 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 /**
- * Production must use a strong, unique secret from the environment — never commit real secrets.
+ * Non-test environments must use a strong, unique JWT secret from environment variables.
  */
 @Component
-@Profile("prod")
+@Profile("!test")
 public class JwtSecretStartupValidator implements ApplicationRunner {
 
     private static final int MIN_SECRET_LENGTH = 32;
@@ -24,12 +24,15 @@ public class JwtSecretStartupValidator implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) {
         String secret = appProperties.getJwt().getSecret();
+        if (secret == null || secret.isBlank()) {
+            throw new IllegalStateException("app.jwt.secret is required (set JWT_SECRET)");
+        }
         if (secret.length() < MIN_SECRET_LENGTH) {
             throw new IllegalStateException(
-                    "app.jwt.secret must be at least " + MIN_SECRET_LENGTH + " characters in profile 'prod'");
+                    "app.jwt.secret must be at least " + MIN_SECRET_LENGTH + " characters");
         }
         if (DEV_PLACEHOLDER.equals(secret)) {
-            throw new IllegalStateException("app.jwt.secret must not use the development placeholder in profile 'prod'");
+            throw new IllegalStateException("app.jwt.secret must not use development placeholder");
         }
     }
 }

@@ -12,14 +12,13 @@
 ## 2) Xcode 已完成配置
 
 - 已添加 entitlements：`潮安/潮安.entitlements`
-- 已开启 Associated Domains（占位）：`applinks:app.yourdomain.com`
+- 已开启 Associated Domains：`applinks:proudmenopause.com`
 - 已在 Debug/Release 加入 `CODE_SIGN_ENTITLEMENTS`
-
-你只需要把 `app.yourdomain.com` 改为你的正式域名。
 
 ## 3) 服务器需部署 AASA 文件
 
 - 模板文件：`docs/apple-app-site-association.template`
+- 可直接发布文件：`docs/apple-app-site-association`
 - 发布路径（两者任选其一，建议都放）：
   - `https://你的域名/.well-known/apple-app-site-association`
   - `https://你的域名/apple-app-site-association`
@@ -37,5 +36,8 @@
 ## 5) 上线前必须替换
 
 - 把 `com.jiaying.--` 改成正式 Bundle ID（例如 `com.xxx.chaoan`）
-- 把 `app.yourdomain.com` 改成你的正式域名
 - 把 AASA 中的 `appID` 改成：`TeamID.正式BundleID`
+
+当前 AASA 文件使用的是：
+- `TeamID`：`RHG2TB2DDV`
+- `BundleID`：`com.jiaying.--`

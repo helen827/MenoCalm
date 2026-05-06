@@ -1194,7 +1194,21 @@ private struct StubAuthAPIClient: AuthAPIClientProtocol {
     var loginResult: Result<AuthTokenPayload, AuthAPIError>
     var refreshResult: Result<AuthTokenPayload, AuthAPIError>
 
+    func sendPhoneCode(_ phone: String) throws {}
+
+    func verifyPhoneCode(_ phone: String, code: String) throws -> AuthTokenPayload {
+        try loginResult.get()
+    }
+
     func loginWithPhone(_ phone: String) throws -> AuthTokenPayload {
+        try loginResult.get()
+    }
+
+    func loginWithTestAccount(_ phone: String, secret: String) throws -> AuthTokenPayload {
+        try loginResult.get()
+    }
+
+    func loginWithWeChatCode(_ code: String) throws -> AuthTokenPayload {
         try loginResult.get()
     }
 

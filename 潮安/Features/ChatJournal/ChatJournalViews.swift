@@ -24,6 +24,9 @@ struct HomeView: View {
                 VStack(alignment: .leading, spacing: 16) {
                     aiBadge
                         .padding(.top, 10)
+#if DEBUG
+                    backendDebugBadge
+#endif
 
                     ForEach(messages) { message in
                         messageBubble(message)
@@ -99,6 +102,18 @@ struct HomeView: View {
             .background(Capsule().fill(.white.opacity(0.82)))
             .frame(maxWidth: .infinity)
     }
+
+#if DEBUG
+    private var backendDebugBadge: some View {
+        Text("后端命中：\(vm.aiBackendEndpointDebug)")
+            .font(.system(size: 12, weight: .medium))
+            .foregroundStyle(CATheme.subText)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 6)
+            .background(Capsule().fill(.white.opacity(0.72)))
+            .frame(maxWidth: .infinity, alignment: .leading)
+    }
+#endif
 
     private func messageBubble(_ message: ChatMessage) -> some View {
         HStack {

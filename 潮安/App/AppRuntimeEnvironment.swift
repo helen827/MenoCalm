@@ -36,9 +36,20 @@ struct RuntimeConfigResolver {
             throw RuntimeConfigError.invalidEnvironment(envRaw)
         }
 
+        let selectedBase: String?
+#if targetEnvironment(simulator)
+        if environment == .dev {
+            selectedBase = defaultBaseURLString(for: .dev)
+        } else {
+            let legacyBase = defaults.string(forKey: "chaoan_backend_base_url")
+            let envSpecific = defaults.string(forKey: "chaoan_backend_base_url_\(environment.rawValue)")
+            selectedBase = (envSpecific?.isEmpty == false ? envSpecific : legacyBase) ?? defaultBaseURLString(for: environment)
+        }
+#else
         let legacyBase = defaults.string(forKey: "chaoan_backend_base_url")
         let envSpecific = defaults.string(forKey: "chaoan_backend_base_url_\(environment.rawValue)")
-        let selectedBase = (envSpecific?.isEmpty == false ? envSpecific : legacyBase) ?? defaultBaseURLString(for: environment)
+        selectedBase = (envSpecific?.isEmpty == false ? envSpecific : legacyBase) ?? defaultBaseURLString(for: environment)
+#endif
         let baseURL = try parseURL(selectedBase)
 
         if environment == .prod {
@@ -65,7 +76,7 @@ struct RuntimeConfigResolver {
     func resolveOrFallback() -> AppRuntimeConfig {
         (try? resolve()) ?? AppRuntimeConfig(
             environment: .dev,
-            backend: BackendServiceConfig(baseURL: nil, timeout: 8)
+            backend: BackendServiceConfig(baseURL: URL(string: defaultBaseURLString(for: .dev) ?? ""), timeout: 8)
         )
     }
 
@@ -82,7 +93,11 @@ struct RuntimeConfigResolver {
     private func defaultBaseURLString(for env: AppRuntimeEnvironment) -> String? {
         switch env {
         case .dev:
+            #if targetEnvironment(simulator)
+            return "http://127.0.0.1:8080"
+            #else
             return nil
+            #endif
         case .staging:
             return "https://staging-api.menocalm.example"
         case .prod:

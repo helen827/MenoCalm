@@ -46,12 +46,15 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/phone/code/send").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/phone/code/verify").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/wechat/login").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/auth/test-account/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/refresh").permitAll()
                         .requestMatchers(HttpMethod.GET, "/community/feed").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/knowledge/docs").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/knowledge/docs/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/actuator/health", "/actuator/health/**").permitAll()
                         .anyRequest().authenticated()
                 )
-                .addFilterBefore(requestIdFilter, JwtAuthenticationFilter.class)
+                .addFilterBefore(requestIdFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
