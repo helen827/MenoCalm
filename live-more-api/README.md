@@ -33,6 +33,8 @@ Spring Boot 3 后端，已收口为 **MySQL + Redis + S3 兼容对象存储** �
 | GET | `/api/v1/conversations/insight?userId=&conversationId=` | Bearer JWT |
 | PUT | `/api/v1/conversations/insight?userId=&conversationId=` | Bearer JWT |
 | POST | `/api/v1/conversations/insight/{conversationId}/analyze?userId=` | Bearer JWT |
+| POST | `/api/v1/conversations/{conversationId}/chat-reply?userId=` | Bearer JWT |
+| POST | `/api/v1/analytics/weekly-report?userId=` | Bearer JWT |
 | GET | `/api/v1/knowledge/docs?limit=` | 无 |
 | GET | `/api/v1/knowledge/docs/{id}` | 无 |
 | POST | `/api/v1/knowledge/docs` | Bearer JWT |
@@ -51,12 +53,20 @@ export MYSQL_PASSWORD='root'
 mvn spring-boot:run
 ```
 
+## 生产部署（阿里云）
+
+无法在替你登录阿里云账号的前提下完成「一键代建」RDS/ECS 等操作。仓库已提供 **`Dockerfile`**（多阶段构建，Java 17）与 **[阿里云 ECS + 托管数据部署说明](docs/deploy-aliyun-ecs.md)**：含 RDS / Redis / OSS / ACR / `docker run` 环境变量示例及与管理站联调要点。
+
 ## 数据库初始化
 
 ```bash
 mysql -h127.0.0.1 -uroot -proot live_more < docs/mysql-core-schema.sql
 mysql -h127.0.0.1 -uroot -proot live_more < docs/mysql-journal-schema.sql
+mysql -h127.0.0.1 -uroot -proot live_more < docs/mysql-migration-symptoms-analytics.sql
+mysql -h127.0.0.1 -uroot -proot live_more < docs/mysql-migration-community-moderation-audit.sql
 ```
+
+若使用 `docker compose` 中的 MinIO：启动后需在控制台 `http://127.0.0.1:9001` 创建与 `S3_BUCKET` 同名的桶（或使用 `mc mb`），并保证 `S3_*` 与 compose 中的 `MINIO_ROOT_*` 一致。
 
 ## 关键配置（环境变量）
 
@@ -93,6 +103,10 @@ mysql -h127.0.0.1 -uroot -proot live_more < docs/mysql-journal-schema.sql
 | `AI_MODEL` | 七牛云模型名称 |
 | `AI_CONNECT_TIMEOUT_MS` | AI 连接超时（毫秒） |
 | `AI_READ_TIMEOUT_MS` | AI 响应超时（毫秒） |
+| `AI_CHAT_TEMPERATURE` | 聊天补全温度（默认见 `application.yml`） |
+| `AI_EXTRACTION_TEMPERATURE` | 症状抽取温度 |
+| `AI_REPORT_TEMPERATURE` | 周报生成温度 |
+| `CONVERSATIONS_DAILY_CONTEXT_ZONE_ID` | 同日对话上下文时区（`ZoneId`，如 `Asia/Shanghai`） |
 | `COMMUNITY_SEED_ON_EMPTY` | 空库时是否导入 `community-feed.seed.json` |
 | `S3_ENDPOINT` | S3 兼容端点 |
 | `S3_BUCKET` | 对象存储桶 |
