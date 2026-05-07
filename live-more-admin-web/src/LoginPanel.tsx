@@ -64,7 +64,7 @@ export function LoginPanel({ onTestLogin, onTokenLogin }: Props) {
         >
           尚未配置 API 根地址。任选其一：在 Render 该静态站的 Environment 中设置{" "}
           <code>VITE_API_BASE</code> 后重新部署；或首次用带参数的地址打开本站（会自动保存并去掉参数）：{" "}
-          <code>?api=https://你的-live-more-api-根地址</code>
+          <code>?api=https://你的-MenoCalm-API-根地址</code>
           （不要末尾 <code>/</code>）。配置好后端时，请把本站来源加入{" "}
           <code>CORS_ALLOWED_ORIGINS</code>。
         </p>
@@ -131,7 +131,7 @@ export function LoginPanel({ onTestLogin, onTokenLogin }: Props) {
       )}
 
       <p className="hint" style={{ marginTop: 20 }}>
-        本地开发：先启动 <code>live-more-api</code>，再在本目录执行 <code>npm run dev</code>。请求会通过 Vite 代理到{" "}
+        本地开发：先启动 <code>menocalm-api</code>，再在本目录执行 <code>npm run dev</code>。请求会通过 Vite 代理到{" "}
         <code>http://127.0.0.1:8080</code>（可用环境变量 <code>VITE_DEV_API_PROXY</code> 修改）。
       </p>
     </div>

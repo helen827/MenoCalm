@@ -1,10 +1,10 @@
 # 潮安 · 社区运营后台（Web）
 
-独立的管理员前端，用于浏览全站帖子、下架帖子、删除评论。调用现有 `live-more-api` 的 `/api/v1/admin/community/**` 与社区评论接口。
+独立的管理员前端，用于浏览全站帖子、下架帖子、删除评论。调用现有 `menocalm-api` 的 `/api/v1/admin/community/**` 与社区评论接口。
 
 ## 前提条件
 
-1. **后端** `live-more-api` 已启动，且 MySQL 中社区表可用。
+1. **后端** `menocalm-api` 已启动，且 MySQL 中社区表可用。
 2. 环境变量 `**COMMUNITY_ADMIN_USER_IDS`** 中写入 **当前登录用户的 JWT subject**（与测试登录返回的 `userID` 一致，例如 `phone_13800138000`）。多个用英文逗号分隔。
 3. 本地开发时，Vite 将 `**/api` 代理**到 `http://127.0.0.1:8080`（可用环境变量 `VITE_DEV_API_PROXY` 覆盖）。
 
@@ -34,7 +34,7 @@ npm run dev
   ```bash
    VITE_API_BASE=https://api.your-domain.com npm run build
   ```
-4. **跨域**：若管理站与 API 不同源，请在 `live-more-api` 的 `CORS_ALLOWED_ORIGINS` 中加入管理页来源（例如 `https://admin.your-domain.com`）。
+4. **跨域**：若管理站与 API 不同源，请在 `menocalm-api` 的 `CORS_ALLOWED_ORIGINS` 中加入管理页来源（例如 `https://admin.your-domain.com`）。
 
 ## 部署到 Render
 
@@ -42,15 +42,15 @@ npm run dev
 
 ### 生产环境：API 根地址与跨域
 
-当前仓库已在 Render 上创建静态站 **`chaoan-community-admin`**（示例域名 `https://chaoan-community-admin.onrender.com`）。要让页面能调用 `live-more-api`，需要把 **API 根 URL** 告诉前端，并在后端放行本站来源。
+当前仓库已在 Render 上创建静态站 **`chaoan-community-admin`**（示例域名 `https://chaoan-community-admin.onrender.com`）。要让页面能调用 `menocalm-api`，需要把 **API 根 URL** 告诉前端，并在后端放行本站来源。
 
-**方式 A（推荐）**：在 Render 打开该静态站 → **Environment** → 新增 **`VITE_API_BASE`** = 你的 `live-more-api` 公网根地址（**不要**末尾 `/`）→ **Manual Deploy** 触发重新构建（Vite 在构建时注入该变量）。
+**方式 A（推荐）**：在 Render 打开该静态站 → **Environment** → 新增 **`VITE_API_BASE`** = 你的 `menocalm-api` 公网根地址（**不要**末尾 `/`）→ **Manual Deploy** 触发重新构建（Vite 在构建时注入该变量）。
 
 **方式 B（免重建）**：用浏览器打开一次带查询参数的首页，例如  
 `https://chaoan-community-admin.onrender.com/?api=https://你的-api根地址`  
 （不要末尾 `/`）。本站会把地址写入浏览器 **localStorage** 并去掉地址栏参数，之后同浏览器内可直接使用。
 
-**后端**：在运行 `live-more-api` 的环境变量中设置 **`CORS_ALLOWED_ORIGINS`**，使其包含管理站来源（例如 `https://chaoan-community-admin.onrender.com`）；多个来源用英文逗号分隔。若保持默认的 `*`（未设置该变量时的占位），一般已允许任意来源，但仍建议生产改为显式列表。并确认 **`COMMUNITY_ADMIN_USER_IDS`** 包含你用于登录后台的账号 id。
+**后端**：在运行 `menocalm-api` 的环境变量中设置 **`CORS_ALLOWED_ORIGINS`**，使其包含管理站来源（例如 `https://chaoan-community-admin.onrender.com`）；多个来源用英文逗号分隔。若保持默认的 `*`（未设置该变量时的占位），一般已允许任意来源，但仍建议生产改为显式列表。并确认 **`COMMUNITY_ADMIN_USER_IDS`** 包含你用于登录后台的账号 id。
 
 ### 与手动创建「Static Site」等价配置
 

@@ -4,7 +4,7 @@
 
 ## 1. 当前技术路线（已确认）
 
-- 主后端工程：`live-more-api/`
+- 主后端工程：`menocalm-api/`
 - 主业务数据库：`MongoDB`
 - 缓存与短期状态：`Redis`
 - 媒体文件存储：`对象存储`（S3 / OSS / COS / MinIO，S3 兼容优先）
