@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { loginTestAccount } from "./api";
+import { getResolvedApiOrigin, loginTestAccount } from "./api";
 import type { AuthTokenResponse } from "./types";
 
 type Props = {
@@ -46,8 +46,29 @@ export function LoginPanel({ onTestLogin, onTokenLogin }: Props) {
     onTokenLogin(t, u);
   }
 
+  const apiBase = getResolvedApiOrigin();
+
   return (
     <div className="card">
+      {!apiBase ? (
+        <p
+          style={{
+            margin: "0 0 16px",
+            padding: 12,
+            background: "#fff8e6",
+            border: "1px solid #f0d090",
+            borderRadius: 8,
+            fontSize: 13,
+            color: "#5c4a00",
+          }}
+        >
+          尚未配置 API 根地址。任选其一：在 Render 该静态站的 Environment 中设置{" "}
+          <code>VITE_API_BASE</code> 后重新部署；或首次用带参数的地址打开本站（会自动保存并去掉参数）：{" "}
+          <code>?api=https://你的-live-more-api-根地址</code>
+          （不要末尾 <code>/</code>）。配置好后端时，请把本站来源加入{" "}
+          <code>CORS_ALLOWED_ORIGINS</code>。
+        </p>
+      ) : null}
       <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
         <button
           type="button"

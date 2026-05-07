@@ -40,14 +40,17 @@ npm run dev
 
 仓库根目录已提供 `[render.yaml](../render.yaml)`，用于 **Render Blueprint**（静态站点 + SPA 回源 + 构建时注入 API 地址）。
 
-### 你需要完成的步骤（我无法代你登录 Render）
+### 生产环境：API 根地址与跨域
 
-1. 将当前改动 **push 到 GitHub / GitLab**（Render 从 Git 拉代码构建）。
-2. 打开 [Render Dashboard](https://dashboard.render.com/) → **New** → **Blueprint**（或 **Static Site** 后手动对齐下面配置）。
-3. 选中本仓库与分支，应用 Blueprint。首次创建时 Render 会要求填写 `**VITE_API_BASE`**：填你的 `**live-more-api` 公网根地址**（示例 `https://live-more-api-xxxx.onrender.com`，**不要**末尾 `/`）。
-4. 部署成功后，记下静态站 URL（如 `https://chaoan-community-admin.onrender.com`）。
-5. 在 `**live-more-api`** 的环境变量里把 `**CORS_ALLOWED_ORIGINS`** 设为包含该静态站 URL（多个来源用英文逗号分隔）。否则浏览器会拦截跨域请求。
-6. 确认 `**COMMUNITY_ADMIN_USER_IDS`** 已包含你用于登录后台的账号 id。
+当前仓库已在 Render 上创建静态站 **`chaoan-community-admin`**（示例域名 `https://chaoan-community-admin.onrender.com`）。要让页面能调用 `live-more-api`，需要把 **API 根 URL** 告诉前端，并在后端放行本站来源。
+
+**方式 A（推荐）**：在 Render 打开该静态站 → **Environment** → 新增 **`VITE_API_BASE`** = 你的 `live-more-api` 公网根地址（**不要**末尾 `/`）→ **Manual Deploy** 触发重新构建（Vite 在构建时注入该变量）。
+
+**方式 B（免重建）**：用浏览器打开一次带查询参数的首页，例如  
+`https://chaoan-community-admin.onrender.com/?api=https://你的-api根地址`  
+（不要末尾 `/`）。本站会把地址写入浏览器 **localStorage** 并去掉地址栏参数，之后同浏览器内可直接使用。
+
+**后端**：在运行 `live-more-api` 的环境变量中设置 **`CORS_ALLOWED_ORIGINS`**，使其包含管理站来源（例如 `https://chaoan-community-admin.onrender.com`）；多个来源用英文逗号分隔。若保持默认的 `*`（未设置该变量时的占位），一般已允许任意来源，但仍建议生产改为显式列表。并确认 **`COMMUNITY_ADMIN_USER_IDS`** 包含你用于登录后台的账号 id。
 
 ### 与手动创建「Static Site」等价配置
 
@@ -60,7 +63,7 @@ npm run dev
 | 环境变量              | `VITE_API_BASE` = 你的 API 根 URL（构建时注入） |
 
 
-本地开发仍用 `npm run dev`（Vite 代理 `/api`）；生产构建只认 `VITE_API_BASE`。
+本地开发仍用 `npm run dev`（Vite 代理 `/api`）。生产环境优先使用构建时注入的 `VITE_API_BASE`，否则使用方式 B 写入的 localStorage 覆盖。
 
 ## 与后端的接口
 

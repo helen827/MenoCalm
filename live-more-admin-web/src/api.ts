@@ -3,14 +3,69 @@ import type { AuthTokenResponse, CommunityComment, CommunityPostPage } from "./t
 const TOKEN_KEY = "lm_admin_access";
 const REFRESH_KEY = "lm_admin_refresh";
 const USER_KEY = "lm_admin_userId";
+const API_BASE_LS = "lm_admin_api_base";
 
-/** In dev, Vite proxies `/api` to the Java backend. In production, set `import.meta.env.VITE_API_BASE` at build time. */
-function apiOrigin(): string {
-  const base = import.meta.env.VITE_API_BASE as string | undefined;
-  if (base && base.trim()) {
-    return base.replace(/\/$/, "");
+/**
+ * Call once on startup. If the URL contains `?api=https://host` (no trailing slash), it is saved to
+ * localStorage and stripped from the address bar so the SPA can reach a remote API without a rebuild.
+ */
+export function bootstrapApiOriginFromLocation(): void {
+  if (typeof window === "undefined") {
+    return;
+  }
+  const params = new URLSearchParams(window.location.search);
+  const raw = params.get("api")?.trim();
+  if (!raw) {
+    return;
+  }
+  if (!/^https?:\/\//i.test(raw)) {
+    console.warn("lm_admin: ignored ?api= (must start with http:// or https://)");
+    return;
+  }
+  const normalized = raw.replace(/\/$/, "");
+  try {
+    localStorage.setItem(API_BASE_LS, normalized);
+  } catch {
+    /* ignore quota / private mode */
+  }
+  try {
+    const url = new URL(window.location.href);
+    url.searchParams.delete("api");
+    const qs = url.searchParams.toString();
+    const next = `${url.pathname}${qs ? `?${qs}` : ""}${url.hash}`;
+    window.history.replaceState({}, "", next || url.pathname);
+  } catch {
+    /* ignore */
+  }
+}
+
+function readStoredApiBase(): string {
+  try {
+    const s = localStorage.getItem(API_BASE_LS);
+    if (s?.trim()) {
+      return s.trim().replace(/\/$/, "");
+    }
+  } catch {
+    /* ignore */
   }
   return "";
+}
+
+/** In dev, Vite proxies `/api` to the Java backend. In production prefer `VITE_API_BASE` at build time, or `?api=` once. */
+function apiOrigin(): string {
+  const base = import.meta.env.VITE_API_BASE as string | undefined;
+  if (base?.trim()) {
+    return base.trim().replace(/\/$/, "");
+  }
+  const stored = readStoredApiBase();
+  if (stored) {
+    return stored;
+  }
+  return "";
+}
+
+export function getResolvedApiOrigin(): string {
+  return apiOrigin();
 }
 
 export function getStoredAccessToken(): string | null {
