@@ -7,6 +7,7 @@ import com.livemore.api.security.JwtService;
 import com.livemore.api.support.PhoneNormalizer;
 import com.livemore.api.support.SecureTokenGenerator;
 import com.livemore.api.support.TokenHasher;
+import com.livemore.api.web.dto.AdminPanelLoginRequest;
 import com.livemore.api.web.dto.AuthTokenResponseDto;
 import com.livemore.api.web.dto.PhoneCodeSendRequest;
 import com.livemore.api.web.dto.PhoneCodeSendResponse;
@@ -19,6 +20,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -86,6 +89,33 @@ public class AuthService {
         }
         String digits = PhoneNormalizer.normalizeCnMobile(request.getPhone())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "invalid_phone"));
+        return loginByPhoneDigits(digits);
+    }
+
+    public AuthTokenResponseDto loginWithAdminPanel(AdminPanelLoginRequest request, String clientIp) {
+        AppProperties.Auth auth = appProperties.getAuth();
+        if (!auth.isAdminPanelLoginEnabled()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "admin_panel_login_disabled");
+        }
+        String configuredPhone = auth.getAdminPanelPhone();
+        String configuredPassword = auth.getAdminPanelPassword();
+        if (configuredPhone == null || configuredPhone.isBlank()
+                || configuredPassword == null || configuredPassword.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "admin_panel_login_not_configured");
+        }
+        String digits = PhoneNormalizer.normalizeCnMobile(request.getPhone())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "invalid_phone"));
+        String expectedDigits = PhoneNormalizer.normalizeCnMobile(configuredPhone)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "admin_panel_phone_invalid_config"));
+        if (!expectedDigits.equals(digits)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "invalid_admin_credentials");
+        }
+        byte[] provided = request.getPassword().getBytes(StandardCharsets.UTF_8);
+        byte[] expected = configuredPassword.getBytes(StandardCharsets.UTF_8);
+        if (provided.length != expected.length || !MessageDigest.isEqual(provided, expected)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "invalid_admin_credentials");
+        }
+        loginRateLimitService.checkAndConsume(digits, clientIp);
         return loginByPhoneDigits(digits);
     }
 

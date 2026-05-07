@@ -11,6 +11,7 @@ Spring Boot 3 后端，对应产品 **MenoCalm / 潮安**；已收口为 **MySQL
 | POST | `/api/v1/auth/phone/login` | 无 |
 | POST | `/api/v1/auth/wechat/login` | 无 |
 | POST | `/api/v1/auth/test-account/login` | 无（需 `X-Test-Account-Secret`） |
+| POST | `/api/v1/auth/admin-panel/login` | 无（需 `ADMIN_PANEL_*` 环境变量启用并配置） |
 | POST | `/api/v1/auth/refresh` | 无 |
 | GET | `/api/v1/journal/entries?userId=` | Bearer JWT |
 | PUT | `/api/v1/journal/entries?userId=` | Bearer JWT |
@@ -126,6 +127,7 @@ mvn test
 
 安全要求：所有受保护接口必须使用正式登录流程签发的 JWT（`/api/v1/auth/phone/code/verify` 或 `/api/v1/auth/wechat/login`）；不支持手工伪造 token 联调。
 补充：在短信/微信未就绪阶段，可临时启用 `POST /api/v1/auth/test-account/login` 获取正式 JWT，但必须配置 `TEST_ACCOUNT_LOGIN_ENABLED=true` 且设置 `TEST_ACCOUNT_SECRET`，上线前应关闭该开关。
+运营后台（`menocalm-admin-web`）推荐使用 `POST /api/v1/auth/admin-panel/login`：设置 `ADMIN_PANEL_LOGIN_ENABLED=true`、`ADMIN_PANEL_PHONE`、`ADMIN_PANEL_PASSWORD`（仅服务端环境变量，勿写入前端仓库）。
 
 1. `POST /api/v1/auth/phone/code/send` 发送短信验证码
 2. `POST /api/v1/auth/phone/code/verify` 用验证码换取 `accessToken/refreshToken`

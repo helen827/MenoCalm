@@ -8,6 +8,7 @@ import com.livemore.api.support.TokenHasher;
 import com.livemore.api.web.dto.PhoneCodeVerifyRequest;
 import com.livemore.api.web.dto.PhoneLoginRequest;
 import com.livemore.api.web.dto.RefreshTokenRequest;
+import com.livemore.api.web.dto.AdminPanelLoginRequest;
 import com.livemore.api.web.dto.TestAccountLoginRequest;
 import com.livemore.api.web.dto.WechatLoginRequest;
 import org.junit.jupiter.api.BeforeEach;
@@ -286,6 +287,58 @@ class AuthServiceTest {
         request.setPhone("13800138000");
 
         ResponseStatusException ex = assertThrows(ResponseStatusException.class, () -> service.loginWithTestAccount(request, "bad"));
+        assertEquals(HttpStatus.UNAUTHORIZED, ex.getStatusCode());
+    }
+
+    @Test
+    void loginWithAdminPanel_whenEnabledAndCredentialsValid_returnsTokensAndRateLimits() {
+        AppProperties appProperties = new AppProperties();
+        appProperties.getJwt().setSecret("dev-only-do-not-use-in-shared-or-production-env-min-32-chars");
+        appProperties.getRefreshToken().setTtlSeconds(2592000);
+        appProperties.getAuth().setAdminPanelLoginEnabled(true);
+        appProperties.getAuth().setAdminPanelPhone("15121150684");
+        appProperties.getAuth().setAdminPanelPassword("pw123");
+        AuthService service = new AuthService(
+                authStore,
+                jwtService,
+                appProperties,
+                loginRateLimitService,
+                wechatOAuthClient,
+                smsCodeService
+        );
+        when(authStore.findUserById("phone_15121150684")).thenReturn(Optional.empty());
+        when(jwtService.createAccessToken("phone_15121150684")).thenReturn("access-token");
+        AdminPanelLoginRequest request = new AdminPanelLoginRequest();
+        request.setPhone("151 2115 0684");
+        request.setPassword("pw123");
+
+        var response = service.loginWithAdminPanel(request, "127.0.0.1");
+
+        assertEquals("phone_15121150684", response.getUserId());
+        assertEquals("access-token", response.getAccessToken());
+        verify(loginRateLimitService).checkAndConsume("15121150684", "127.0.0.1");
+    }
+
+    @Test
+    void loginWithAdminPanel_whenPasswordWrong_returns401() {
+        AppProperties appProperties = new AppProperties();
+        appProperties.getJwt().setSecret("dev-only-do-not-use-in-shared-or-production-env-min-32-chars");
+        appProperties.getAuth().setAdminPanelLoginEnabled(true);
+        appProperties.getAuth().setAdminPanelPhone("15121150684");
+        appProperties.getAuth().setAdminPanelPassword("pw123");
+        AuthService service = new AuthService(
+                authStore,
+                jwtService,
+                appProperties,
+                loginRateLimitService,
+                wechatOAuthClient,
+                smsCodeService
+        );
+        AdminPanelLoginRequest request = new AdminPanelLoginRequest();
+        request.setPhone("15121150684");
+        request.setPassword("wrong");
+
+        ResponseStatusException ex = assertThrows(ResponseStatusException.class, () -> service.loginWithAdminPanel(request, "127.0.0.1"));
         assertEquals(HttpStatus.UNAUTHORIZED, ex.getStatusCode());
     }
 }

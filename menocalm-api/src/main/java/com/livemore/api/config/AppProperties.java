@@ -141,6 +141,9 @@ public class AppProperties {
         private boolean legacyPhoneLoginEnabled = false;
         private boolean testAccountLoginEnabled = false;
         private String testAccountSecret = "";
+        private boolean adminPanelLoginEnabled = false;
+        private String adminPanelPhone = "";
+        private String adminPanelPassword = "";
 
         public LoginRateLimit getLoginRateLimit() {
             return loginRateLimit;
@@ -176,6 +179,30 @@ public class AppProperties {
 
         public void setTestAccountSecret(String testAccountSecret) {
             this.testAccountSecret = testAccountSecret;
+        }
+
+        public boolean isAdminPanelLoginEnabled() {
+            return adminPanelLoginEnabled;
+        }
+
+        public void setAdminPanelLoginEnabled(boolean adminPanelLoginEnabled) {
+            this.adminPanelLoginEnabled = adminPanelLoginEnabled;
+        }
+
+        public String getAdminPanelPhone() {
+            return adminPanelPhone;
+        }
+
+        public void setAdminPanelPhone(String adminPanelPhone) {
+            this.adminPanelPhone = adminPanelPhone;
+        }
+
+        public String getAdminPanelPassword() {
+            return adminPanelPassword;
+        }
+
+        public void setAdminPanelPassword(String adminPanelPassword) {
+            this.adminPanelPassword = adminPanelPassword;
         }
     }
 

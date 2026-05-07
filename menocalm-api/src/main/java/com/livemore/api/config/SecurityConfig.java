@@ -47,6 +47,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/phone/code/verify").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/wechat/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/test-account/login").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/auth/admin-panel/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/refresh").permitAll()
                         .requestMatchers(HttpMethod.GET, "/community/feed").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/knowledge/docs").permitAll()
@@ -66,7 +67,12 @@ public class SecurityConfig {
         if ("*".equals(origins.trim())) {
             config.setAllowedOriginPatterns(List.of("*"));
         } else {
-            config.setAllowedOrigins(Arrays.asList(origins.split(",")));
+            config.setAllowedOrigins(
+                    Arrays.stream(origins.split(","))
+                            .map(String::trim)
+                            .filter(s -> !s.isEmpty())
+                            .toList()
+            );
         }
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));

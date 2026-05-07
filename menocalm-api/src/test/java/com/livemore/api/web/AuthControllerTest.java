@@ -3,6 +3,7 @@ package com.livemore.api.web;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.livemore.api.config.RequestIdFilter;
 import com.livemore.api.service.AuthService;
+import com.livemore.api.web.dto.AdminPanelLoginRequest;
 import com.livemore.api.web.dto.AuthTokenResponseDto;
 import com.livemore.api.web.dto.PhoneCodeSendRequest;
 import com.livemore.api.web.dto.PhoneCodeSendResponse;
@@ -135,6 +136,27 @@ class AuthControllerTest {
         mockMvc.perform(post("/api/v1/auth/test-account/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("X-Test-Account-Secret", "secret-1")
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.accessToken").value("access"))
+                .andExpect(jsonPath("$.userID").value("phone_15121150684"));
+    }
+
+    @Test
+    void adminPanelLogin_success_returnsTokenResponse() throws Exception {
+        AdminPanelLoginRequest request = new AdminPanelLoginRequest();
+        request.setPhone("15121150684");
+        request.setPassword("secret-pw");
+        when(authService.loginWithAdminPanel(
+                argThat(r -> r != null
+                        && "15121150684".equals(r.getPhone())
+                        && "secret-pw".equals(r.getPassword())),
+                eq("10.0.0.2")
+        )).thenReturn(new AuthTokenResponseDto("access", "refresh", 1800, "phone_15121150684"));
+
+        mockMvc.perform(post("/api/v1/auth/admin-panel/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("X-Forwarded-For", "10.0.0.2, 192.168.1.1")
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.accessToken").value("access"))

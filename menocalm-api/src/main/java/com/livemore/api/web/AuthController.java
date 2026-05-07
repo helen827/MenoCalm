@@ -1,6 +1,7 @@
 package com.livemore.api.web;
 
 import com.livemore.api.service.AuthService;
+import com.livemore.api.web.dto.AdminPanelLoginRequest;
 import com.livemore.api.web.dto.AuthTokenResponseDto;
 import com.livemore.api.web.dto.PhoneCodeSendRequest;
 import com.livemore.api.web.dto.PhoneCodeSendResponse;
@@ -59,6 +60,14 @@ public class AuthController {
             @RequestHeader(value = "X-Test-Account-Secret", required = false) String testSecret
     ) {
         return authService.loginWithTestAccount(request, testSecret);
+    }
+
+    @PostMapping(path = "/admin-panel/login", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public AuthTokenResponseDto adminPanelLogin(
+            @Valid @RequestBody AdminPanelLoginRequest request,
+            HttpServletRequest httpRequest
+    ) {
+        return authService.loginWithAdminPanel(request, extractClientIp(httpRequest));
     }
 
     private String extractClientIp(HttpServletRequest request) {
