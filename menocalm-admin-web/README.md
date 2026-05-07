@@ -11,7 +11,7 @@
 ## 本地运行
 
 ```bash
-cd live-more-admin-web
+cd menocalm-admin-web
 npm install
 npm run dev
 ```
@@ -57,7 +57,7 @@ npm run dev
 
 | 项                 | 值                                     |
 | ----------------- | ------------------------------------- |
-| Root Directory    | `live-more-admin-web`                 |
+| Root Directory    | `menocalm-admin-web`                 |
 | Build Command     | `npm install && npm run build`        |
 | Publish directory | `dist`                                |
 | 环境变量              | `VITE_API_BASE` = 你的 API 根 URL（构建时注入） |
